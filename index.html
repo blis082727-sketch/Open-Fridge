@@ -8,55 +8,56 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="theme-color" content="#0F2A24">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap">
 <style>
-:root{--bg:#E8EFEC;--ink:#14302A;--mut:#4F6A63;--card:#fff;--line:#C5D5CF;--mag:#F4B400;--magink:#2A2000;--ok:#1E7A4F;--miss:#B4432B;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{--bg:#E7E2D6;--ink:#14302A;--mut:#54615A;--card:#F4F0E6;--line:#C6BFAE;--mag:#F4B400;--magink:#2A2000;--ok:#1D6A44;--miss:#A33A24;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0F2A24;--ink:#E4F2EC;--mut:#A3C2B7;--card:#173A32;--line:#2F5A4F;--ok:#5FD39A;--miss:#FF8F73}}
 :root[data-theme="dark"]{--bg:#0F2A24;--ink:#E4F2EC;--mut:#A3C2B7;--card:#173A32;--line:#2F5A4F;--ok:#5FD39A;--miss:#FF8F73}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 'Bricolage Grotesque',system-ui,sans-serif}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
 main{max-width:640px;margin:0 auto;padding:16px}
+h1,h2,.nm{font-family:Georgia,"Iowan Old Style","Palatino Linotype",serif}
 h1{font-size:2.1rem;letter-spacing:-.02em;margin:8px 0 2px;font-weight:800}
 .sub{margin:0 0 14px;color:var(--mut)}
-.door{background:var(--card);border:2px solid var(--ink);border-radius:18px;padding:14px}
+.door{background:var(--card);border:2px solid var(--ink);border-radius:3px;padding:14px}
 h2{font-size:1.05rem;margin:0 0 8px}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;min-height:24px}
-.chip,.sug{font:inherit;font-weight:600;border-radius:999px;padding:8px 14px;cursor:pointer;min-height:40px}
-.chip{background:var(--mag);color:var(--magink);border:0;box-shadow:0 2px 0 rgba(0,0,0,.28)}
+.chip,.sug{font:inherit;font-weight:600;border-radius:3px;padding:8px 14px;cursor:pointer;min-height:40px}
+.chip{background:var(--mag);color:var(--magink);border:0}
 .chip:nth-child(odd){transform:rotate(-1.5deg)}.chip:nth-child(even){transform:rotate(1deg)}
 .sug{background:transparent;color:var(--ink);border:2px dashed var(--line)}
 .row{display:flex;gap:8px}
-input[type=text]{flex:1;min-width:0;font:inherit;padding:10px 12px;border:2px solid var(--ink);border-radius:10px;background:var(--bg);color:var(--ink)}
-.add{font:inherit;font-weight:800;border:0;border-radius:10px;padding:0 16px;background:var(--ink);color:var(--bg);cursor:pointer}
+input[type=text]{flex:1;min-width:0;font:inherit;padding:10px 12px;border:2px solid var(--ink);border-radius:3px;background:var(--bg);color:var(--ink)}
+.add{font:inherit;font-weight:800;border:0;border-radius:3px;padding:0 16px;background:var(--ink);color:var(--bg);cursor:pointer}
 .pick{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;max-height:150px;overflow-y:auto}
 .opt{display:flex;align-items:center;gap:8px;margin-top:12px;color:var(--mut);font-size:.92rem}
 .tabs{display:flex;gap:6px;margin:18px 0 8px}
-.tabs button{flex:1;font:inherit;font-weight:600;padding:10px 4px;border:2px solid var(--ink);border-radius:10px;background:transparent;color:var(--ink);cursor:pointer}
+.tabs button{flex:1;font:inherit;font-weight:600;padding:10px 4px;border:2px solid var(--ink);border-radius:3px;background:transparent;color:var(--ink);cursor:pointer}
 .tabs button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;margin:8px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:3px;margin:8px 0}
 .hd{width:100%;font:inherit;color:inherit;text-align:left;background:none;border:0;padding:12px 14px;cursor:pointer;display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 .wrap{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s ease}
 .card.open .wrap{grid-template-rows:1fr}
 .in{overflow:hidden}
 .acts{display:flex;gap:8px;margin-top:12px}
-.btn{font:inherit;font-weight:600;padding:9px 14px;border-radius:10px;border:2px solid var(--ink);background:transparent;color:var(--ink);cursor:pointer}
+.btn{font:inherit;font-weight:600;padding:9px 14px;border-radius:3px;border:2px solid var(--ink);background:transparent;color:var(--ink);cursor:pointer}
 .btn.pri{background:var(--ink);color:var(--bg)}
 .btn[aria-pressed=true]{background:var(--mag);color:var(--magink);border-color:var(--mag)}
 .mod{position:fixed;inset:0;z-index:5;background:var(--bg);overflow-y:auto;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(24px + env(safe-area-inset-bottom,0px));animation:up .3s ease}
 @keyframes up{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
 .in2{max-width:640px;margin:0 auto}
-.mod ul{list-style:none;padding:0;margin:0 0 14px}
+.mod ul{list-style:disc;padding-left:1.2rem;margin:0 0 14px}
+.mod ul:has(.si){list-style:none;padding-left:0}
 .mod ol{padding-left:1.3rem}.mod ol li{margin:0 0 10px;max-width:60ch}
 .tabs button{font-size:.82rem}
 .top{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .cats{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:6px}
-.cats button{flex:none;font:inherit;font-size:.88rem;font-weight:600;padding:7px 14px;border-radius:999px;border:2px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.cats button{flex:none;font:inherit;font-size:.88rem;font-weight:600;padding:7px 14px;border-radius:3px;border:2px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
 .cats button[aria-pressed=true]{background:var(--mag);border-color:var(--mag);color:var(--magink)}
 .tb{display:flex;gap:6px}.tb .btn{padding:7px 10px;font-size:.85rem}.top{flex-wrap:wrap}
 .acts{flex-wrap:wrap}
 .si{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
 .si input{width:20px;height:20px;flex:none}
-textarea{width:100%;box-sizing:border-box;font:inherit;font-size:.85rem;padding:10px;border:2px solid var(--ink);border-radius:10px;background:var(--bg);color:var(--ink);margin:10px 0}
+textarea{width:100%;box-sizing:border-box;font:inherit;font-size:.85rem;padding:10px;border:2px solid var(--ink);border-radius:3px;background:var(--bg);color:var(--ink);margin:10px 0}
 .foot{margin:24px 0 8px;text-align:center}
 .ckh{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
 .bar{height:6px;background:var(--line);border-radius:3px}.bar i{display:block;height:100%;background:var(--mag);border-radius:3px;transition:width .3s}
@@ -71,11 +72,11 @@ textarea{width:100%;box-sizing:border-box;font:inherit;font-size:.85rem;padding:
 .st{font-size:.88rem;font-weight:600;text-align:right;max-width:46%}
 .st.ok{color:var(--ok)}.st.no{color:var(--miss)}
 .bd{padding:0 14px 14px}
-.bd ul{list-style:none;padding:0;margin:0 0 10px}
-.have::before{content:"✓ ";color:var(--ok)}.need::before{content:"✗ ";color:var(--miss)}
-.need{font-weight:600}
+.bd ul{list-style:disc;padding-left:1.2rem;margin:0 0 10px}
+.need{font-weight:700}.need::after{content:" (need)";font-weight:400;color:var(--miss)}
 .bd p{margin:0;max-width:60ch}
 .empty{color:var(--mut);padding:16px 4px}
+.doc{max-width:60ch;margin:0 0 12px}
 :focus-visible{outline:3px solid var(--mag);outline-offset:2px}
 </style>
 </head>
@@ -117,7 +118,7 @@ textarea{width:100%;box-sizing:border-box;font:inherit;font-size:.85rem;padding:
 <button data-c="df" aria-pressed="false">Dairy-free</button>
 </div>
 <div id="list"></div>
-<p class="foot"><button class="btn" id="bk">Backup and restore</button></p>
+<p class="foot"><button class="btn" id="bk">Backup and restore</button> <button class="btn" id="pv">Privacy</button> <button class="btn" id="tm">Terms</button></p>
 </main>
 
 <script>
@@ -388,7 +389,7 @@ function renderRecipes(){
     const badge=ok?'<span class="st ok">Ready</span>':`<span class="st no">Need: ${esc(miss.join(', '))}</span>`;
     const li=r[2].map(x=>{const h=hs.has(N(x))||(stap&&SS.has(N(x)));return`<li class="${h?'have':'need'}">${esc(x)}</li>`}).join('');
     const sv=saved.includes(r[0]),op=openSet.has(r[0]);
-    return`<div class="card${op?' open':''}" data-n="${esc(r[0])}"><button class="hd" aria-expanded="${op}"><span class="nm">${esc(r[0])}<small>${r[1]} min</small></span>${badge}</button><div class="wrap"><div class="in"><div class="bd"><ul>${li}</ul><div class="acts"><button class="btn" data-save aria-pressed="${sv}">${sv?'Saved ✓':'Save'}</button>${miss.length?'<button class="btn" data-shop>+ List</button>':''}<button class="btn pri" data-view>Full recipe</button></div></div></div></div></div>`;
+    return`<div class="card${op?' open':''}" data-n="${esc(r[0])}"><button class="hd" aria-expanded="${op}"><span class="nm">${esc(r[0])}<small>${r[1]} min</small></span>${badge}</button><div class="wrap"><div class="in"><div class="bd"><ul>${li}</ul><div class="acts"><button class="btn" data-save aria-pressed="${sv}">${sv?'Saved':'Save'}</button>${miss.length?'<button class="btn" data-shop>+ List</button>':''}<button class="btn pri" data-view>Full recipe</button></div></div></div></div></div>`;
   }).join('');
 }
 function renderAll(){renderHave();renderPick();renderEx();renderShopBtn();renderRecipes()}
@@ -415,7 +416,7 @@ function addMissing(r){analyze(r).miss.forEach(x=>{if(!shop.some(s=>N(s)===N(x))
 function showShop(){
   document.querySelectorAll('.mod').forEach(x=>x.remove());
   const m=document.createElement('div');m.className='mod';m.setAttribute('role','dialog');m.setAttribute('aria-label','Shopping list');
-  m.innerHTML='<div class="in2"><button class="btn" data-x>← Back</button><h1>Shopping list</h1>'+(shop.length?`<ul>${shop.map((x,i)=>`<li><label class="si"><input type="checkbox" data-k="${i}"> ${esc(x)}</label></li>`).join('')}</ul><div class="acts"><button class="btn pri" data-bought>Bought: add to fridge</button><button class="btn" data-rm>Remove checked</button></div>`:'<p class="empty">Nothing here yet. Open a recipe and tap Add missing to shopping list.</p>')+'</div>';
+  m.innerHTML='<div class="in2"><button class="btn" data-x>Back</button><h1>Shopping list</h1>'+(shop.length?`<ul>${shop.map((x,i)=>`<li><label class="si"><input type="checkbox" data-k="${i}"> ${esc(x)}</label></li>`).join('')}</ul><div class="acts"><button class="btn pri" data-bought>Bought: add to fridge</button><button class="btn" data-rm>Remove checked</button></div>`:'<p class="empty">Nothing here yet. Open a recipe and tap Add missing to shopping list.</p>')+'</div>';
   m.onclick=e=>{
     if(e.target.closest('[data-x]')){m.remove();return}
     const ks=[...m.querySelectorAll('[data-k]:checked')].map(c=>+c.dataset.k);
@@ -471,7 +472,7 @@ function cook(n){
 function showBackup(){
   document.querySelectorAll('.mod').forEach(x=>x.remove());
   const m=document.createElement('div');m.className='mod';m.setAttribute('role','dialog');m.setAttribute('aria-label','Backup and restore');
-  m.innerHTML='<div class="in2"><button class="btn" data-x>← Back</button><h1>Backup and restore</h1><p class="sub">Copy this code and keep it somewhere safe, like a note. To restore here or on another device, paste a saved code into the box and tap Restore.</p><textarea rows="8" aria-label="Backup code"></textarea><div class="acts"><button class="btn pri" data-cp>Copy</button><button class="btn" data-rt>Restore</button></div><p class="alert" role="status"></p></div>';
+  m.innerHTML='<div class="in2"><button class="btn" data-x>Back</button><h1>Backup and restore</h1><p class="sub">Copy this code and keep it somewhere safe, like a note. To restore here or on another device, paste a saved code into the box and tap Restore.</p><textarea rows="8" aria-label="Backup code"></textarea><div class="acts"><button class="btn pri" data-cp>Copy</button><button class="btn" data-rt>Restore</button></div><p class="alert" role="status"></p></div>';
   const ta=m.querySelector('textarea'),say=t=>{m.querySelector('.alert').textContent=t};
   ta.value=JSON.stringify({v:1,have,saved,shop,ex,stap});
   m.onclick=async e=>{
@@ -482,12 +483,15 @@ function showBackup(){
   document.body.appendChild(m);m.querySelector('[data-x]').focus();
 }
 $('bk').onclick=showBackup;
+function showDoc(t,ps){document.querySelectorAll('.mod').forEach(x=>x.remove());const m=document.createElement('div');m.className='mod';m.setAttribute('role','dialog');m.setAttribute('aria-label',t);m.innerHTML='<div class="in2"><button class="btn" data-x>Back</button><h1>'+t+'</h1>'+ps.map(p=>'<p class="doc">'+p+'</p>').join('')+'</div>';m.onclick=e=>{if(e.target.closest('[data-x]'))m.remove()};document.body.appendChild(m);m.querySelector('[data-x]').focus()}
+$('pv').onclick=()=>showDoc('Privacy',["Open Fridge has no accounts, no ads and no analytics.","Your fridge list, saved recipes, shopping list, left-out ingredients and settings are stored only in this browser on your device. They are never sent to a server run by this app.","The app loads no third-party fonts or scripts. The site is hosted on GitHub Pages, and GitHub may log standard visit details such as your IP address and browser type, as described in GitHub's own privacy statement.","Clearing your browser's site data erases your saved information. A backup code is plain text that you copy and store yourself, so keep it somewhere you trust."]);
+$('tm').onclick=()=>showDoc('Terms',["Open Fridge is provided as is, with no warranty of any kind. You use it at your own risk.","Recipes are general cooking guidance. Times, temperatures and amounts are estimates, so use your own judgment and check that food is cooked through.","Dietary labels such as vegetarian, vegan, gluten-free and dairy-free are worked out from the listed ingredients only. They do not account for brands, cross-contamination or unlisted extras. If you have an allergy or a medical diet, check packaging and ask a professional.","The recipes and the code may be changed or removed at any time."]);
 const openSet=new Set();
 $('list').onclick=e=>{
   const c=e.target.closest('.card');if(!c)return;
   const n=c.dataset.n;
   if(e.target.closest('[data-save]')){saved=saved.includes(n)?saved.filter(x=>x!==n):[...saved,n];save();renderRecipes();return}
-  if(e.target.closest('[data-shop]')){const bt=e.target.closest('[data-shop]');addMissing(R.find(x=>x[0]===n));bt.textContent='Added ✓';return}
+  if(e.target.closest('[data-shop]')){const bt=e.target.closest('[data-shop]');addMissing(R.find(x=>x[0]===n));bt.textContent='Added';return}
   if(e.target.closest('[data-view]')){showFull(n);return}
   if(e.target.closest('.hd')){const o=c.classList.toggle('open');o?openSet.add(n):openSet.delete(n);c.querySelector('.hd').setAttribute('aria-expanded',o)}
 };
@@ -496,8 +500,8 @@ function showFull(n){
   const steps=D[n]?D[n].t:r[3].split('. ').map(s=>s.endsWith('.')?s:s+'.');
   const m=document.createElement('div');m.className='mod';m.setAttribute('role','dialog');m.setAttribute('aria-label',r[0]);
   const li=r[2].map((x,i)=>`<li class="${a.hs.has(N(x))||(stap&&SS.has(N(x)))?'have':'need'}">${esc(D[n]?(D[n].q[i].toLowerCase().includes(N(x))?D[n].q[i]:x+': '+D[n].q[i]):x)}</li>`).join('');
-  m.innerHTML=`<div class="in2"><button class="btn" data-x>← Back</button><h1>${esc(r[0])}</h1><p class="sub">Takes ${r[1]} minutes. ${D[n]?D[n].s+'. ':''}${a.miss.length?'You still need: '+esc(a.miss.join(', ')):'You have everything.'}</p>${tg(r)?'<p class="sub">'+tg(r)+'</p>':''}<div class="acts" style="margin:0 0 14px"><button class="btn pri" data-cook>Start cooking</button></div><h2>Ingredients</h2><ul>${li}</ul>${a.miss.length?'<button class="btn" data-shop>Add missing to shopping list</button>':''}<h2>Steps</h2><ol>${steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol></div>`;
-  m.onclick=e=>{if(e.target.closest('[data-x]'))m.remove();const sb=e.target.closest('[data-shop]');if(sb){addMissing(r);sb.textContent='Added ✓'}if(e.target.closest('[data-cook]'))cook(n)};
+  m.innerHTML=`<div class="in2"><button class="btn" data-x>Back</button><h1>${esc(r[0])}</h1><p class="sub">Takes ${r[1]} minutes. ${D[n]?D[n].s+'. ':''}${a.miss.length?'You still need: '+esc(a.miss.join(', ')):'You have everything.'}</p>${tg(r)?'<p class="sub">'+tg(r)+'</p>':''}<div class="acts" style="margin:0 0 14px"><button class="btn pri" data-cook>Start cooking</button></div><h2>Ingredients</h2><ul>${li}</ul>${a.miss.length?'<button class="btn" data-shop>Add missing to shopping list</button>':''}<h2>Steps</h2><ol>${steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol></div>`;
+  m.onclick=e=>{if(e.target.closest('[data-x]'))m.remove();const sb=e.target.closest('[data-shop]');if(sb){addMissing(r);sb.textContent='Added'}if(e.target.closest('[data-cook]'))cook(n)};
   m.onkeydown=e=>{if(e.key==='Escape')m.remove()};
   document.body.appendChild(m);m.querySelector('[data-x]').focus();
 }
