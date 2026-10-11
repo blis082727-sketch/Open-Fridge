@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Open Fridge</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#0F2A24">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap">
+<style>
+:root{--bg:#E8EFEC;--ink:#14302A;--mut:#4F6A63;--card:#fff;--line:#C5D5CF;--mag:#F4B400;--magink:#2A2000;--ok:#1E7A4F;--miss:#B4432B;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0F2A24;--ink:#E4F2EC;--mut:#A3C2B7;--card:#173A32;--line:#2F5A4F;--ok:#5FD39A;--miss:#FF8F73}}
+:root[data-theme="dark"]{--bg:#0F2A24;--ink:#E4F2EC;--mut:#A3C2B7;--card:#173A32;--line:#2F5A4F;--ok:#5FD39A;--miss:#FF8F73}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 'Bricolage Grotesque',system-ui,sans-serif}
+main{max-width:640px;margin:0 auto;padding:16px}
+h1{font-size:2.1rem;letter-spacing:-.02em;margin:8px 0 2px;font-weight:800}
+.sub{margin:0 0 14px;color:var(--mut)}
+.door{background:var(--card);border:2px solid var(--ink);border-radius:18px;padding:14px}
+h2{font-size:1.05rem;margin:0 0 8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;min-height:24px}
+.chip,.sug{font:inherit;font-weight:600;border-radius:999px;padding:8px 14px;cursor:pointer;min-height:40px}
+.chip{background:var(--mag);color:var(--magink);border:0;box-shadow:0 2px 0 rgba(0,0,0,.28)}
+.chip:nth-child(odd){transform:rotate(-1.5deg)}.chip:nth-child(even){transform:rotate(1deg)}
+.sug{background:transparent;color:var(--ink);border:2px dashed var(--line)}
+.row{display:flex;gap:8px}
+input[type=text]{flex:1;min-width:0;font:inherit;padding:10px 12px;border:2px solid var(--ink);border-radius:10px;background:var(--bg);color:var(--ink)}
+.add{font:inherit;font-weight:800;border:0;border-radius:10px;padding:0 16px;background:var(--ink);color:var(--bg);cursor:pointer}
+.pick{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;max-height:150px;overflow-y:auto}
+.opt{display:flex;align-items:center;gap:8px;margin-top:12px;color:var(--mut);font-size:.92rem}
+.tabs{display:flex;gap:6px;margin:18px 0 8px}
+.tabs button{flex:1;font:inherit;font-weight:600;padding:10px 4px;border:2px solid var(--ink);border-radius:10px;background:transparent;color:var(--ink);cursor:pointer}
+.tabs button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;margin:8px 0}
+.hd{width:100%;font:inherit;color:inherit;text-align:left;background:none;border:0;padding:12px 14px;cursor:pointer;display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.wrap{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s ease}
+.card.open .wrap{grid-template-rows:1fr}
+.in{overflow:hidden}
+.acts{display:flex;gap:8px;margin-top:12px}
+.btn{font:inherit;font-weight:600;padding:9px 14px;border-radius:10px;border:2px solid var(--ink);background:transparent;color:var(--ink);cursor:pointer}
+.btn.pri{background:var(--ink);color:var(--bg)}
+.btn[aria-pressed=true]{background:var(--mag);color:var(--magink);border-color:var(--mag)}
+.mod{position:fixed;inset:0;z-index:5;background:var(--bg);overflow-y:auto;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(24px + env(safe-area-inset-bottom,0px));animation:up .3s ease}
+@keyframes up{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+.in2{max-width:640px;margin:0 auto}
+.mod ul{list-style:none;padding:0;margin:0 0 14px}
+.mod ol{padding-left:1.3rem}.mod ol li{margin:0 0 10px;max-width:60ch}
+.tabs button{font-size:.82rem}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.cats{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:6px}
+.cats button{flex:none;font:inherit;font-size:.88rem;font-weight:600;padding:7px 14px;border-radius:999px;border:2px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.cats button[aria-pressed=true]{background:var(--mag);border-color:var(--mag);color:var(--magink)}
+.tb{display:flex;gap:6px}.tb .btn{padding:7px 10px;font-size:.85rem}.top{flex-wrap:wrap}
+.acts{flex-wrap:wrap}
+.si{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.si input{width:20px;height:20px;flex:none}
+textarea{width:100%;box-sizing:border-box;font:inherit;font-size:.85rem;padding:10px;border:2px solid var(--ink);border-radius:10px;background:var(--bg);color:var(--ink);margin:10px 0}
+.foot{margin:24px 0 8px;text-align:center}
+.ckh{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.bar{height:6px;background:var(--line);border-radius:3px}.bar i{display:block;height:100%;background:var(--mag);border-radius:3px;transition:width .3s}
+.ct{font-size:1.6rem;line-height:1.35;font-weight:600;margin:24px 0;max-width:30ch}
+.td{font-size:3.2rem;font-weight:800;font-variant-numeric:tabular-nums}
+.alert{color:var(--ok);font-weight:800;min-height:1.4em}
+.btn:disabled{opacity:.4}
+.nav .btn{flex:1;padding:14px}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+@media (prefers-reduced-motion:reduce){.wrap{transition:none}.mod{animation:none}}
+.nm{font-weight:800}.nm small{display:block;font-weight:400;color:var(--mut)}
+.st{font-size:.88rem;font-weight:600;text-align:right;max-width:46%}
+.st.ok{color:var(--ok)}.st.no{color:var(--miss)}
+.bd{padding:0 14px 14px}
+.bd ul{list-style:none;padding:0;margin:0 0 10px}
+.have::before{content:"✓ ";color:var(--ok)}.need::before{content:"✗ ";color:var(--miss)}
+.need{font-weight:600}
+.bd p{margin:0;max-width:60ch}
+.empty{color:var(--mut);padding:16px 4px}
+:focus-visible{outline:3px solid var(--mag);outline-offset:2px}
+</style>
+</head>
+<body>
+<main>
+<div class="top"><h1>Open Fridge</h1><div class="tb"><button class="btn" id="shopBtn">List (0)</button><button class="btn" id="theme" aria-label="Switch between light and dark mode">Dark mode</button></div></div>
+<p class="sub">Tell it what you have. It shows what you can cook.</p>
+
+<section class="door" aria-label="Your fridge">
+<h2>In your fridge</h2>
+<div class="chips" id="have"></div>
+<div class="row"><input type="text" id="q" placeholder="Search or type an ingredient" autocomplete="off" aria-label="Search ingredients"><button class="add" id="addBtn">Add</button></div>
+<div class="pick" id="pick"></div>
+<label class="opt"><input type="checkbox" id="stap"> Assume I have salt, pepper, oil and water</label>
+<h2 style="margin-top:16px">Leave out</h2>
+<div class="chips" id="exc"></div>
+<div class="row"><input type="text" id="exq" list="exd" placeholder="e.g. mushrooms, peanut" autocomplete="off" aria-label="Ingredient to leave out"><button class="add" id="exBtn">Leave out</button></div>
+<datalist id="exd"></datalist>
+</section>
+
+<div class="row" style="margin-top:18px"><input type="text" id="rs" placeholder="Search recipes" autocomplete="off" aria-label="Search recipes"><button class="add" id="surp">Surprise me</button></div>
+<div class="tabs" id="tabs">
+<button data-t="ready" aria-pressed="true"></button>
+<button data-t="almost" aria-pressed="false"></button>
+<button data-t="all" aria-pressed="false"></button>
+<button data-t="saved" aria-pressed="false"></button>
+</div>
+<div class="cats" id="cats">
+<button data-c="all" aria-pressed="true">All</button>
+<button data-c="b" aria-pressed="false">Breakfast</button>
+<button data-c="l" aria-pressed="false">Lunch</button>
+<button data-c="d" aria-pressed="false">Dinner</button>
+<button data-c="quick" aria-pressed="false">Quick</button>
+<button data-c="veg" aria-pressed="false">Vegetarian</button>
+<button data-c="s" aria-pressed="false">Soup</button>
+<button data-c="w" aria-pressed="false">Dessert</button>
+<button data-c="vegan" aria-pressed="false">Vegan</button>
+<button data-c="gf" aria-pressed="false">Gluten-free</button>
+<button data-c="df" aria-pressed="false">Dairy-free</button>
+</div>
+<div id="list"></div>
+<p class="foot"><button class="btn" id="bk">Backup and restore</button></p>
+</main>
+
+<script>
+const ST=["salt","pepper","oil","olive oil","water"];
+const R=[
+["Scrambled eggs on toast",10,["eggs","bread","butter"],"Whisk eggs with a pinch of salt. Melt butter in a pan on low heat and stir the eggs gently until just set. Pile onto toast."],
+["Cheese omelette",10,["eggs","cheese","butter"],"Beat eggs and cook in buttered pan on medium heat. When almost set, add cheese, fold in half and serve."],
+["Fried rice",15,["rice","eggs","onion","soy sauce","peas"],"Fry chopped onion in oil. Add cold cooked rice and peas, push aside, scramble eggs in the gap. Mix together with soy sauce."],
+["Tomato pasta",20,["pasta","tomatoes","garlic","olive oil"],"Boil pasta. Fry garlic in olive oil, add chopped tomatoes and simmer 10 minutes. Toss with pasta and salt."],
+["Garlic butter pasta",15,["pasta","garlic","butter","cheese"],"Boil pasta. Melt butter with minced garlic for 2 minutes. Toss with pasta and top with cheese."],
+["Grilled cheese sandwich",8,["bread","cheese","butter"],"Butter the outside of two slices, put cheese between. Fry on medium heat until golden on both sides."],
+["Mashed potatoes",25,["potatoes","butter","milk"],"Boil peeled chunks of potato until soft. Drain, mash with butter and a splash of warm milk. Season with salt."],
+["Loaded baked potato",60,["potatoes","butter","cheese"],"Prick potatoes and bake at 200C/400F for about 50 minutes. Split open, add butter and cheese."],
+["Pancakes",20,["flour","milk","eggs","butter","sugar"],"Whisk flour, milk, an egg and a spoon of sugar into a batter. Cook ladlefuls in buttered pan, flipping when bubbles form."],
+["French toast",12,["bread","eggs","milk","cinnamon"],"Beat eggs with milk and cinnamon. Dip bread, fry in butter or oil until golden on both sides."],
+["Chicken and rice",35,["chicken","rice","onion","garlic"],"Brown chicken pieces in oil with onion and garlic. Add rice and twice its volume of water, cover and simmer 18 minutes."],
+["Tuna sandwich",5,["tuna","mayo","bread"],"Mix drained tuna with mayo, salt and pepper. Spread on bread."],
+["Quesadilla",10,["tortillas","cheese"],"Put cheese on half a tortilla, fold over and fry on each side until crisp and melted."],
+["Bean burrito",15,["tortillas","beans","cheese","onion"],"Warm beans with chopped onion. Spoon onto a tortilla with cheese, roll up and toast in a pan."],
+["Veggie stir-fry",20,["carrots","broccoli","soy sauce","garlic","rice"],"Cook rice. Stir-fry sliced carrots and broccoli with garlic in hot oil for 5 minutes. Add soy sauce, serve over rice."],
+["Tomato soup",30,["tomatoes","onion","garlic","water"],"Soften chopped onion and garlic in oil. Add tomatoes and a cup of water, simmer 20 minutes, blend and season."],
+["Chicken wrap",10,["tortillas","chicken","lettuce","mayo"],"Spread mayo on a tortilla, add sliced cooked chicken and lettuce, then roll tightly."],
+["Egg salad sandwich",15,["eggs","mayo","bread"],"Hard boil eggs for 10 minutes, cool and chop. Mix with mayo and salt, then spread on bread."],
+["Banana oatmeal",10,["oats","milk","banana"],"Simmer oats in milk for 5 minutes, stirring. Top with sliced banana."],
+["Peanut butter banana toast",5,["bread","peanut butter","banana"],"Toast bread, spread peanut butter and top with sliced banana."],
+["Spaghetti aglio e olio",15,["pasta","garlic","chili flakes","olive oil"],"Boil pasta. Gently cook sliced garlic and chili flakes in olive oil until fragrant. Toss with pasta and a splash of pasta water."],
+["Mac and cheese",25,["pasta","cheese","milk","butter"],"Boil macaroni. Melt butter, stir in milk and cheese until smooth. Mix with pasta."],
+["Potato and egg hash",25,["potatoes","eggs","onion"],"Fry diced potato and onion in oil until crisp, about 15 minutes. Make wells and crack in eggs, cover until set."],
+["Simple Greek salad",10,["cucumber","tomatoes","feta","olives"],"Chop cucumber and tomatoes. Add olives and crumbled feta, drizzle with olive oil."],
+["Yogurt parfait",5,["yogurt","oats","honey"],"Layer yogurt and oats in a glass, drizzle with honey."],
+["Lentil soup",35,["lentils","carrots","onion","garlic"],"Soften chopped onion, carrot and garlic in oil. Add rinsed lentils and 4 cups water, simmer 25 minutes. Season."],
+["Beef chili",45,["beans","tomatoes","onion","ground beef","chili powder"],"Brown beef with onion. Add tomatoes, beans, chili powder and a cup of water. Simmer 30 minutes."],
+["Cheeseburger",20,["ground beef","buns","cheese","onion"],"Form beef into patties, season and fry 4 minutes per side. Top with cheese, serve in buns with onion."],
+['Eggs in tomato sauce',30,['eggs','tomatoes','onion','garlic'],''],
+['Avocado toast',5,['bread','avocado'],''],
+['Bean and rice bowl',20,['rice','beans','onion','cheese'],''],
+['Banana oat pancakes',15,['banana','eggs','oats'],''],
+['Baked chicken and potatoes',55,['chicken','potatoes','garlic'],''],
+['Tuna pasta',20,['pasta','tuna','garlic'],''],
+['Potato soup',40,['potatoes','onion','milk','butter'],''],
+['Chicken noodle soup',40,['chicken','pasta','carrots','onion'],''],
+['Carrot soup',35,['carrots','onion','garlic'],''],
+['Black bean soup',30,['beans','onion','garlic'],''],
+['Peanut butter cookies',20,['peanut butter','sugar','eggs'],''],
+['Rice pudding',45,['rice','milk','sugar'],''],
+['Baked cinnamon apples',35,['apples','cinnamon','butter','oats'],''],
+['Mug cake',5,['flour','sugar','milk','butter'],''],
+['Chickpea salad',10,['chickpeas','cucumber','tomatoes'],''],
+['Roasted vegetables',45,['carrots','potatoes','onion'],''],
+['Honey garlic chicken',30,['chicken','honey','garlic','soy sauce'],''],
+['Peanut pasta',20,['pasta','peanut butter','soy sauce','garlic'],''],
+['Spinach omelette',10,['eggs','spinach','cheese'],''],
+['Garlic bread',10,['bread','butter','garlic'],''],
+['Oatmeal cookies',25,['oats','flour','butter','sugar','eggs'],''],
+['Banana bread',65,['banana','flour','eggs','sugar','butter'],''],
+['Brownies',35,['butter','sugar','eggs','flour','cocoa'],''],
+['Apple crumble',50,['apples','oats','butter','sugar','cinnamon'],''],
+['Banana ice cream',180,['banana'],''],
+['Chocolate pudding',15,['milk','sugar','cocoa','cornstarch'],''],
+['Sugar cookies',30,['flour','butter','sugar','eggs'],''],
+['Minestrone',40,['beans','pasta','tomatoes','carrots','onion'],''],
+['Chicken and rice soup',40,['chicken','rice','carrots','onion'],''],
+['Sweet potato soup',35,['sweet potatoes','onion','garlic'],''],
+['Mushroom soup',35,['mushrooms','onion','butter','milk','flour'],''],
+['Broccoli cheddar soup',30,['broccoli','cheese','onion','milk','butter'],''],
+['Corn chowder',35,['corn','potatoes','onion','milk','butter'],''],
+['Chickpea tomato soup',30,['chickpeas','tomatoes','onion','garlic'],''],
+['Breakfast burrito',15,['tortillas','eggs','cheese','beans'],''],
+['Apple cinnamon oatmeal',10,['oats','apples','cinnamon','milk'],''],
+['Egg in a hole',10,['bread','eggs','butter'],''],
+['Hash browns',25,['potatoes','onion'],''],
+['Banana smoothie',5,['banana','milk','yogurt'],''],
+['Cinnamon toast',8,['bread','butter','sugar','cinnamon'],''],
+['Tofu scramble',15,['tofu','onion','spinach'],''],
+['Cheesy tomato toast',10,['bread','tomatoes','cheese'],''],
+['Cinnamon baked bananas',15,['banana','cinnamon','sugar'],''],
+['No-bake oat bites',15,['oats','peanut butter','honey','cocoa'],''],
+['Hot chocolate',5,['milk','cocoa','sugar'],''],
+['Berry crumble',40,['berries','oats','butter','sugar'],''],
+['Baked custard',50,['eggs','milk','sugar'],''],
+['Simple meringues',80,['eggs','sugar'],''],
+['Shortbread',35,['flour','butter','sugar'],''],
+['Honey baked pears',35,['pears','honey','cinnamon'],''],
+['Cabbage soup',35,['cabbage','carrots','onion','tomatoes'],''],
+['Split pea soup',70,['split peas','carrots','onion'],''],
+['Zucchini soup',30,['zucchini','onion','potatoes'],''],
+['Cauliflower soup',35,['cauliflower','onion','garlic'],''],
+['Tomato lentil soup',35,['lentils','tomatoes','onion','garlic'],''],
+['Vegetable soup',40,['carrots','potatoes','onion','tomatoes'],''],
+['Sweet potato lentil soup',40,['sweet potatoes','lentils','onion'],''],
+['White bean soup',30,['beans','carrots','onion','garlic'],''],
+['Chicken vegetable soup',45,['chicken','carrots','potatoes','onion'],''],
+['Tortilla soup',35,['tortillas','tomatoes','beans','onion','garlic'],''],
+['Peanut butter banana oatmeal',10,['oats','peanut butter','banana'],''],
+['Chickpea scramble',15,['chickpeas','onion','garlic'],''],
+['Breakfast potatoes',30,['potatoes','onion','garlic'],''],
+['Banana cinnamon toast',5,['bread','banana','cinnamon'],''],
+['Avocado egg toast',10,['bread','avocado','eggs'],''],
+['Tomato and eggs',10,['eggs','tomatoes','sugar'],''],
+['Chickpea curry',30,['chickpeas','tomatoes','onion','garlic','curry powder'],''],
+['Black bean tacos',15,['tortillas','beans','tomatoes','avocado'],''],
+['Vegetable fried rice',20,['rice','carrots','peas','soy sauce','garlic'],''],
+['Lentil bolognese',40,['pasta','lentils','tomatoes','onion','garlic'],''],
+['Stuffed sweet potatoes',60,['sweet potatoes','beans','onion'],''],
+['Tofu stir-fry',30,['tofu','broccoli','soy sauce','garlic','rice'],'']
+];
+const N=s=>{s=s.toLowerCase().trim().replace(/\s+/g,' ');return s.endsWith('oes')?s.slice(0,-2):(s.endsWith('s')&&!s.endsWith('ss')&&s.length>3)?s.slice(0,-1):s};
+const SS=new Set(ST.map(N));
+const D={
+'Scrambled eggs on toast':{s:'Serves 1',q:['3 large eggs','2 slices','1 tbsp (15 g)'],t:['Crack the eggs into a bowl, add a pinch of salt and whisk with a fork until no streaks of white remain.','Put the bread in the toaster.','Melt the butter in a non-stick pan over low heat. Do not let it brown.','Pour in the eggs and wait 20 seconds. Then stir slowly with a spatula, pushing the eggs from the edges to the middle.','Keep stirring gently for 2 to 3 minutes. Take the pan off the heat while the eggs still look slightly wet, since they keep cooking.','Pile the eggs onto the toast and finish with pepper.']},
+'Cheese omelette':{s:'Serves 1',q:['3 large eggs','1/3 cup (40 g) grated','1 tbsp (15 g)'],t:['Whisk the eggs with a pinch of salt and pepper until smooth.','Heat a 20 cm (8 inch) non-stick pan over medium heat and melt the butter until it foams.','Pour in the eggs. As the edges set, drag them toward the center with a spatula and tilt the pan so raw egg runs underneath. This takes about 1 minute.','When the top is mostly set but still slightly glossy, scatter the cheese over one half.','Fold the empty half over the cheese, cook 30 more seconds, then slide onto a plate.']},
+'Fried rice':{s:'Serves 2',q:['3 cups (500 g) cooked rice, cold, ideally from the day before','2 large eggs, beaten','1 small, diced','2 tbsp, plus more to taste','1/2 cup (75 g) frozen'],t:['Break up any clumps in the cold rice with your hands. Cold, dry rice is the key to fried rice that is not mushy.','Heat 1 tbsp oil in a large pan or wok over medium-high heat. Cook the onion for 3 minutes until soft.','Add the peas and cook 2 minutes. Push everything to one side.','Add 1 tsp oil to the empty space, pour in the eggs and scramble for 1 minute until just set.','Add the rice, press it into the pan and stir for 3 to 4 minutes until hot and starting to crisp.','Pour in the soy sauce, toss for 30 seconds and taste. Add more soy sauce if needed.']},
+'Tomato pasta':{s:'Serves 2',q:['200 g (7 oz) dried','4 medium (about 500 g), chopped','3 cloves, sliced','3 tbsp'],t:['Bring a large pot of water to a boil and add 1 tbsp salt. Cook the pasta for the time on the packet, usually 9 to 11 minutes. Save 1/2 cup of the pasta water, then drain.','While it cooks, heat the olive oil in a wide pan over medium heat. Add the garlic and cook 1 minute until fragrant but not brown.','Add the tomatoes and 1/2 tsp salt. Simmer 10 to 12 minutes, pressing them with a spoon, until saucy.','Add the pasta to the sauce with a splash of pasta water. Toss for 1 minute over low heat.','Taste, add salt and pepper, and serve.']},
+'Garlic butter pasta':{s:'Serves 2',q:['200 g (7 oz) dried','4 cloves, minced','3 tbsp (45 g)','1/2 cup (50 g) grated'],t:['Boil the pasta in well-salted water for the time on the packet. Save 1/2 cup of the pasta water before draining.','Melt the butter in a pan over low heat. Add the garlic and cook 2 minutes, stirring, until fragrant. Do not let it brown or it turns bitter.','Add the drained pasta and 3 tbsp pasta water. Toss well for 1 minute.','Take it off the heat, stir in most of the cheese and add more pasta water if it looks dry.','Serve topped with the rest of the cheese and black pepper.']},
+'Grilled cheese sandwich':{s:'Serves 1',q:['2 slices','2 slices, or 1/2 cup (50 g) grated','1 tbsp (15 g), softened'],t:['Spread the butter thinly on one side of each slice of bread.','Put one slice butter-side down in a cold pan, add the cheese, and top with the other slice butter-side up.','Turn the heat to medium-low. Cook 3 to 4 minutes until deep golden underneath.','Flip and cook 3 minutes more until golden and the cheese has melted. Lower the heat if the bread browns too fast.','Rest 1 minute, cut in half and serve.']},
+'Mashed potatoes':{s:'Serves 3 to 4',q:['1 kg (2 lb)','4 tbsp (60 g)','1/2 cup (120 ml), warmed'],t:['Peel the potatoes and cut them into even 4 cm (1.5 inch) chunks so they cook at the same speed.','Put them in a pot, cover with cold water, add 1 tsp salt and bring to a boil. Simmer 15 to 20 minutes until a knife slides in easily.','Drain well and return to the hot pot for 1 minute to steam off extra water.','Mash until smooth. Add the butter, then pour in the warm milk a little at a time until creamy.','Season with salt and pepper and serve right away.']},
+'Loaded baked potato':{s:'Serves 2',q:['2 large baking potatoes','2 tbsp (30 g)','1/2 cup (50 g) grated'],t:['Heat the oven to 200C (400F). Scrub the potatoes and dry them.','Prick each potato 5 or 6 times with a fork. Rub with 1 tsp oil and sprinkle with salt.','Place them directly on the oven rack and bake 50 to 60 minutes, until the skin is crisp and a knife goes in with no resistance.','Cut a slit along the top and squeeze the ends to open it. Add the butter and let it melt.','Top with the cheese, return to the oven for 3 minutes, then add pepper and serve.']},
+'Pancakes':{s:'Makes about 8',q:['1 1/2 cups (190 g)','1 1/4 cups (300 ml)','1 large','3 tbsp (45 g), melted, plus more for the pan','2 tbsp'],t:['In a bowl, whisk the flour, sugar and a pinch of salt. If you have baking powder, add 2 tsp for fluffier pancakes.','In another bowl, whisk the milk, egg and 3 tbsp melted butter.','Pour the wet mix into the dry and stir until just combined. A few lumps are fine; overmixing makes them tough. Rest 5 minutes.','Heat a pan over medium heat and rub it with a little butter.','Pour in about 1/4 cup of batter per pancake. Cook 2 minutes until bubbles form and the edges look set.','Flip and cook 1 to 2 minutes until golden. Keep warm and repeat with the rest.']},
+'French toast':{s:'Serves 2',q:['4 slices, a bit stale if possible','2 large','1/2 cup (120 ml)','1 tsp'],t:['Whisk the eggs, milk and cinnamon in a shallow dish with a pinch of salt.','Heat a pan over medium heat with 1 tbsp butter or oil.','Dip a slice of bread for about 10 seconds per side, so it soaks up the egg without falling apart.','Fry 2 to 3 minutes per side until golden brown. Add more butter between batches.','Serve warm with sugar, honey or fruit.']},
+'Chicken and rice':{s:'Serves 2',q:['2 chicken thighs or 300 g (10 oz) chicken breast, cubed','1 cup (200 g) uncooked long-grain','1 medium, diced','3 cloves, minced'],t:['Pat the chicken dry and season with salt and pepper.','Heat 1 tbsp oil in a lidded pan over medium-high heat. Brown the chicken 3 to 4 minutes per side, then set aside.','In the same pan, cook the onion 3 minutes, add the garlic for 30 seconds, then stir in the rinsed rice for 1 minute.','Pour in 2 cups (475 ml) water and 1/2 tsp salt. Bring to a boil, add the chicken back, cover and turn the heat to low.','Cook 18 minutes without lifting the lid. Check the chicken reaches 74C (165F) inside.','Rest covered for 5 minutes, then fluff with a fork.']},
+'Tuna sandwich':{s:'Serves 1',q:['1 can (140 g), drained','2 tbsp','2 slices'],t:['Drain the tuna well and flake it into a bowl.','Stir in the mayo, a pinch of salt and plenty of pepper.','Toast the bread if you like, spread the tuna mix on one slice and close with the other.','Cut in half and eat soon so the bread stays crisp.']},
+'Quesadilla':{s:'Serves 1',q:['1 large (20 cm / 8 inch), or 2 small','3/4 cup (75 g) grated'],t:['Heat a dry pan over medium heat.','Lay the tortilla in the pan and scatter the cheese over one half.','Fold the empty half over and press down gently with a spatula.','Cook 2 minutes until golden underneath, flip, and cook 2 minutes more until the cheese is melted.','Rest 1 minute, cut into wedges and serve.']},
+'Bean burrito':{s:'Serves 2',q:['2 large','1 can (400 g), drained and rinsed','1 cup (100 g) grated','1/2 small, diced'],t:['Heat 1 tsp oil in a pan over medium heat and cook the onion 3 minutes until soft.','Add the beans with 2 tbsp water and mash about half with a fork. Cook 4 minutes and season with salt and pepper.','Warm the tortillas in a dry pan for 20 seconds per side so they bend without cracking.','Spoon the beans down the middle, top with cheese, fold in the sides and roll up tightly.','Toast seam-side down in the pan for 2 minutes per side until crisp.']},
+'Veggie stir-fry':{s:'Serves 2',q:['2 medium, sliced thin','1 large head (about 300 g), cut into small florets','3 tbsp','3 cloves, minced','1 cup (200 g) uncooked'],t:['Start the rice: simmer it in 2 cups (475 ml) water, covered, for 15 minutes.','Mix the soy sauce with 2 tbsp water in a small bowl.','Heat 1 tbsp oil in a large pan over high heat. Stir-fry the carrots for 2 minutes.','Add the broccoli and 3 tbsp water, cover for 2 minutes to steam, then uncover.','Add the garlic and cook 30 seconds. Pour in the sauce and toss 1 minute until glossy.','Serve over the rice.']},
+'Tomato soup':{s:'Serves 3',q:['6 medium (about 800 g), chopped, or 1 can (800 g)','1 medium, diced','3 cloves, minced','2 cups (475 ml)'],t:['Heat 2 tbsp oil in a pot over medium heat. Cook the onion 5 minutes until soft.','Add the garlic for 30 seconds, then the tomatoes and 1 tsp salt.','Pour in the water, bring to a boil, then simmer 20 minutes until the tomatoes collapse.','Blend until smooth, or mash with a potato masher for a rustic texture.','Season with salt and pepper and serve hot.']},
+'Chicken wrap':{s:'Serves 1',q:['1 large','1 cooked breast or thigh (about 120 g), sliced','1 handful, shredded','1 tbsp'],t:['If your chicken is raw, season it and fry 6 to 7 minutes per side until no pink remains, then slice.','Warm the tortilla in a dry pan for 20 seconds per side.','Spread the mayo over the tortilla, leaving a 2 cm (1 inch) border.','Layer the lettuce and chicken in a line across the center.','Fold in the sides, roll up tightly and cut in half.']},
+'Egg salad sandwich':{s:'Serves 2',q:['4 large','3 tbsp','4 slices'],t:['Place the eggs in a pot, cover with cold water and bring to a boil. Turn off the heat, cover, and leave 10 minutes.','Move the eggs to cold water for 5 minutes, then peel.','Chop the eggs and mix with the mayo, 1/4 tsp salt and pepper.','Spread onto 2 slices of bread, close with the other 2 and cut in half.']},
+'Banana oatmeal':{s:'Serves 1',q:['1/2 cup (45 g) rolled','1 cup (240 ml)','1 ripe, sliced'],t:['Combine the oats, milk and a pinch of salt in a small pot over medium heat.','Bring to a gentle simmer and cook 5 minutes, stirring often, until thick and creamy.','Stir in half of the banana for the last minute.','Pour into a bowl and top with the rest of the banana.']},
+'Peanut butter banana toast':{s:'Serves 1',q:['2 slices','2 tbsp','1 ripe, sliced'],t:['Toast the bread until golden.','Spread 1 tbsp peanut butter on each slice while warm so it softens.','Top with the banana slices and press lightly.','Add a pinch of cinnamon or a drizzle of honey if you have them.']},
+'Spaghetti aglio e olio':{s:'Serves 2',q:['200 g (7 oz) spaghetti','5 cloves, thinly sliced','1/2 tsp, or to taste','1/4 cup (60 ml)'],t:['Boil the spaghetti in well-salted water for the time on the packet. Save 1 cup of pasta water before draining.','While it cooks, put the olive oil and garlic in a cold pan and heat over medium-low.','Cook 3 to 4 minutes until the garlic is pale gold, then add the chili flakes for 20 seconds. Do not let the garlic brown.','Add the pasta and 1/2 cup pasta water. Toss over medium heat 1 to 2 minutes until the sauce coats the pasta.','Add more pasta water if needed, season with salt and serve.']},
+'Mac and cheese':{s:'Serves 3',q:['200 g (7 oz) macaroni','2 cups (200 g) grated','1 1/2 cups (350 ml)','2 tbsp (30 g)'],t:['Boil the macaroni in salted water until just tender, usually 8 minutes. Drain.','In the same pot over low heat, melt the butter and add the milk. Warm until steaming, not boiling.','Add the cheese a handful at a time, stirring until each handful melts. Keep the heat low.','Return the pasta to the pot and stir until coated. The sauce thickens as it stands for 2 minutes.','Season with salt and pepper and serve.']},
+'Potato and egg hash':{s:'Serves 2',q:['500 g (1 lb), cut into 1 cm (1/2 inch) cubes','4 large','1 medium, diced'],t:['Boil the potato cubes in salted water for 5 minutes, then drain well. This shortens the frying time.','Heat 2 tbsp oil in a large pan over medium-high heat. Add the potatoes and cook 8 to 10 minutes, turning every 2 minutes, until crisp and golden.','Add the onion and cook 4 minutes more.','Make 4 small wells in the hash and crack an egg into each. Season with salt and pepper.','Cover and cook on low heat 4 to 5 minutes until the whites are set and the yolks are as runny as you like.']},
+'Simple Greek salad':{s:'Serves 2',q:['1 medium, sliced into half-moons','3 medium, cut into wedges','100 g (3.5 oz), crumbled or cubed','1/3 cup (50 g), pitted'],t:['Combine the cucumber, tomatoes and olives in a large bowl.','Drizzle with 2 tbsp olive oil and add a pinch of salt and pepper. If you have oregano, add 1/2 tsp.','Toss gently.','Place the feta on top and finish with a little more olive oil.']},
+'Yogurt parfait':{s:'Serves 1',q:['1 cup (240 g)','1/3 cup (30 g)','1 tbsp'],t:['Spoon half of the yogurt into a glass.','Add half of the oats. For a crunchier texture, toast them first in a dry pan for 3 minutes.','Drizzle with half of the honey.','Repeat the layers with the rest and eat right away so the oats stay crunchy.']},
+'Lentil soup':{s:'Serves 4',q:['1 cup (200 g) dried brown or green','2 medium, diced','1 medium, diced','4 cloves, minced'],t:['Rinse the lentils in a sieve and pick out any stones.','Heat 2 tbsp oil in a pot over medium heat. Cook the onion and carrots 6 minutes until soft, then add the garlic for 30 seconds.','Add the lentils, 4 cups (950 ml) water and 1 tsp salt. Bring to a boil.','Reduce the heat and simmer, partly covered, 25 to 30 minutes until the lentils are tender.','Mash a few with a spoon to thicken, season with salt and pepper and serve.']},
+'Beef chili':{s:'Serves 4',q:['2 cans (400 g each), drained and rinsed','1 can (400 g) chopped, or 3 medium tomatoes','1 large, diced','500 g (1 lb)','1 1/2 tbsp, or to taste'],t:['Heat a large pot over medium-high heat. Brown the beef 6 to 8 minutes, breaking it up, then drain excess fat.','Add the onion and cook 4 minutes until soft.','Stir in the chili powder and 1 tsp salt for 1 minute.','Add the tomatoes, beans and 1 cup (240 ml) water. Bring to a simmer.','Cook on low 30 minutes, stirring now and then, until thick. Taste and adjust the salt.']},
+'Cheeseburger':{s:'Serves 2',q:['300 g (10 oz)','2','2 slices','1/2 small, sliced into rings'],t:['Divide the beef into 2 balls and press into patties slightly wider than the buns. Press a small dimple in the center and season both sides with salt and pepper.','Heat a pan over medium-high heat. Cook the patties 4 minutes without pressing.','Flip, cook 3 minutes, then lay a cheese slice on each and cover for 1 minute to melt.','While they cook, toast the buns cut-side down in a dry pan for 1 minute.','Build with the patty and onion rings. Rest 2 minutes before eating. Beef should reach 71C (160F).']},
+'Eggs in tomato sauce':{s:'Serves 2',q:['4 large','1 can (400 g) chopped, or 4 medium tomatoes','1 medium, diced','3 cloves, minced'],t:['Heat 2 tbsp oil in a wide pan over medium heat. Cook the onion 5 minutes until soft, then the garlic for 30 seconds.','Add the tomatoes, 1/2 tsp salt and pepper. Simmer 10 minutes until thick.','Make 4 wells in the sauce with a spoon and crack an egg into each.','Cover and cook on low 5 to 7 minutes until the whites are set but the yolks still wobble.','Serve straight from the pan, with bread if you have it.']},
+'Avocado toast':{s:'Serves 1',q:['2 slices','1 ripe, halved and pitted'],t:['Toast the bread until crisp and golden.','Scoop the avocado into a bowl, add a pinch of salt and mash with a fork, leaving some chunks.','Spread it thickly on the toast.','Finish with pepper. If you have chili flakes or a squeeze of lemon, add them.']},
+'Bean and rice bowl':{s:'Serves 2',q:['1 cup (200 g) uncooked','1 can (400 g), drained and rinsed','1/2 medium, diced','1/2 cup (50 g) grated'],t:['Cook the rice: simmer in 2 cups (475 ml) water, covered, for 15 minutes, then rest 5 minutes.','Heat 1 tsp oil in a pan and cook the onion 4 minutes until soft.','Add the beans, 3 tbsp water, 1/2 tsp salt and pepper. Cook 5 minutes, mashing a few beans.','Spoon the rice into bowls, top with the beans and sprinkle with cheese.']},
+'Banana oat pancakes':{s:'Makes about 6 small',q:['1 large ripe','2 large','1/2 cup (45 g) rolled'],t:['Mash the banana in a bowl until smooth.','Whisk in the eggs, then stir in the oats and a pinch of salt. Rest 5 minutes so the oats soften.','Heat a non-stick pan over medium-low heat with a little oil or butter.','Pour in 2 tbsp of batter per pancake. Cook 2 to 3 minutes until set and golden underneath.','Flip carefully and cook 1 to 2 minutes more. They are delicate, so keep them small.']},
+'Baked chicken and potatoes':{s:'Serves 2',q:['4 thighs or drumsticks (about 600 g)','600 g (1 1/4 lb), cut into 3 cm (1 inch) chunks','4 cloves, minced'],t:['Heat the oven to 220C (425F).','Toss the potatoes with 2 tbsp oil, 1/2 tsp salt and half of the garlic on a large baking tray.','Pat the chicken dry and rub with 1 tbsp oil, the rest of the garlic, 1 tsp salt and pepper. Nestle it among the potatoes, skin side up.','Roast 40 to 45 minutes, turning the potatoes once halfway, until the chicken reaches 74C (165F) and the skin is crisp.','Rest 5 minutes and serve.']},
+'Tuna pasta':{s:'Serves 2',q:['200 g (7 oz)','1 can (140 g), drained','3 cloves, sliced'],t:['Boil the pasta in salted water for the time on the packet. Save 1/2 cup of pasta water, then drain.','Heat 3 tbsp oil in a pan over medium-low heat and cook the garlic 2 minutes until pale gold.','Add the tuna, break it up and warm for 2 minutes.','Add the pasta with a splash of pasta water and toss 1 minute until glossy.','Season with salt and plenty of pepper and serve.']},
+'Potato soup':{s:'Serves 3',q:['600 g (1 1/4 lb), peeled and cubed','1 medium, diced','1 cup (240 ml)','2 tbsp (30 g)'],t:['Melt the butter in a pot over medium heat. Cook the onion 5 minutes until soft.','Add the potatoes and 3 cups (700 ml) water with 1 tsp salt. Bring to a boil, then simmer 15 minutes until very tender.','Mash roughly in the pot for a chunky soup, or blend for a smooth one.','Stir in the milk and warm gently for 3 minutes. Do not boil.','Season with salt and pepper and serve.']},
+'Chicken noodle soup':{s:'Serves 3',q:['2 thighs or 1 breast (about 300 g)','1 cup (80 g) small pasta or broken spaghetti','2 medium, sliced','1 medium, diced'],t:['Heat 1 tbsp oil in a pot. Cook the onion and carrots 5 minutes.','Add the chicken, 5 cups (1.2 L) water and 1 tsp salt. Bring to a boil, then simmer 20 minutes until cooked through.','Lift out the chicken, shred it with two forks and return it to the pot.','Add the pasta and simmer 8 to 10 minutes until tender.','Season with salt and pepper and serve hot.']},
+'Carrot soup':{s:'Serves 3',q:['500 g (1 lb), sliced','1 medium, diced','3 cloves, minced'],t:['Heat 2 tbsp oil in a pot over medium heat. Cook the onion 5 minutes, then the garlic for 30 seconds.','Add the carrots, 3 cups (700 ml) water and 1 tsp salt. Bring to a boil.','Simmer 20 minutes until the carrots are very soft.','Blend until smooth, adding water if it is too thick.','Season with salt and pepper and serve.']},
+'Black bean soup':{s:'Serves 3',q:['2 cans (400 g each), with their liquid','1 medium, diced','3 cloves, minced'],t:['Heat 1 tbsp oil in a pot. Cook the onion 5 minutes, then the garlic for 30 seconds.','Add the beans with their liquid, 1 cup (240 ml) water and 1/2 tsp salt.','Simmer 15 minutes.','Mash or blend about half to thicken, leaving some beans whole.','Season with salt and pepper and serve.']},
+'Peanut butter cookies':{s:'Makes about 12',q:['1 cup (250 g)','1/2 cup (100 g)','1 large'],t:['Heat the oven to 175C (350F) and line a tray with baking paper.','Mix the peanut butter, sugar and egg in a bowl until smooth and thick.','Roll tablespoon-sized balls and place them 5 cm (2 inches) apart on the tray.','Press each flat with a fork in a criss-cross pattern.','Bake 10 to 12 minutes until the edges are set. They look soft but firm up as they cool. Cool 10 minutes on the tray.']},
+'Rice pudding':{s:'Serves 3',q:['1/2 cup (100 g)','3 cups (700 ml)','3 tbsp'],t:['Put the rice, milk, sugar and a pinch of salt in a heavy pot.','Bring to a gentle simmer over medium heat, then reduce to low.','Cook 30 to 35 minutes, stirring every few minutes so it does not stick, until thick and creamy.','Rest 5 minutes. It thickens as it cools, so add a splash of milk if it gets too thick.','Serve warm or cold, with cinnamon if you have it.']},
+'Baked cinnamon apples':{s:'Serves 2',q:['2 medium, cored and sliced','1 tsp','1 tbsp (15 g), cubed','1/4 cup (25 g) rolled'],t:['Heat the oven to 190C (375F).','Toss the apple slices with the cinnamon in a small baking dish.','Scatter the oats and butter cubes over the top.','Bake 25 minutes until the apples are soft and the top is golden.','Cool 5 minutes before serving. Add honey or sugar if you want it sweeter.']},
+'Mug cake':{s:'Serves 1',q:['4 tbsp','2 tbsp','3 tbsp','2 tbsp (30 g), melted'],t:['In a large microwave-safe mug, stir the flour, sugar and a pinch of salt. Add 1/4 tsp baking powder if you have it for a lighter cake.','Add the milk and melted butter and stir until smooth.','Microwave on high 70 to 90 seconds, until the top looks set.','Rest 1 minute, since the mug is hot, then eat with a spoon.']},
+'Chickpea salad':{s:'Serves 2',q:['1 can (400 g), drained and rinsed','1 medium, diced','2 medium, diced'],t:['Drain and rinse the chickpeas, then pat dry.','Combine with the cucumber and tomatoes in a bowl.','Dress with 2 tbsp olive oil, a pinch of salt and pepper. Add lemon juice or vinegar if you have it.','Toss and let stand 5 minutes so the flavors mix.']},
+'Roasted vegetables':{s:'Serves 3',q:['3 medium, cut into batons','500 g (1 lb), cut into 3 cm (1 inch) chunks','1 large, cut into wedges'],t:['Heat the oven to 220C (425F).','Toss all the vegetables on a large tray with 3 tbsp oil, 1 tsp salt and pepper. Spread in one layer so they roast instead of steam.','Roast 35 to 40 minutes, turning once halfway, until browned at the edges and tender.','Taste and add more salt if needed.']},
+'Honey garlic chicken':{s:'Serves 2',q:['500 g (1 lb) thighs or breast, cut into bite-size pieces','3 tbsp','4 cloves, minced','3 tbsp'],t:['Season the chicken with pepper. Heat 1 tbsp oil in a large pan over medium-high heat.','Cook the chicken 6 to 7 minutes, turning, until browned and cooked through with no pink inside.','Lower the heat, add the garlic and cook 30 seconds.','Stir in the honey and soy sauce. Simmer 2 to 3 minutes until sticky and glossy.','Serve over rice if you have it.']},
+'Peanut pasta':{s:'Serves 2',q:['200 g (7 oz)','3 tbsp','2 tbsp','2 cloves, minced'],t:['Boil the pasta in salted water for the time on the packet. Save 1/2 cup of pasta water, then drain.','In a bowl, whisk the peanut butter, soy sauce, garlic and 4 tbsp hot pasta water until smooth.','Toss the pasta in the sauce, adding more pasta water until silky.','Taste and add more soy sauce for salt, or a pinch of chili flakes for heat.']},
+'Spinach omelette':{s:'Serves 1',q:['3 large','1 big handful (about 40 g)','1/4 cup (25 g) grated'],t:['Heat 1 tsp oil in a pan over medium heat. Add the spinach and stir 1 minute until wilted, then tip it onto a plate.','Whisk the eggs with salt and pepper and pour into the same pan.','Cook 1 to 2 minutes, dragging the edges inward, until nearly set.','Add the spinach and cheese to one half, fold over and cook 30 seconds more.']},
+'Garlic bread':{s:'Serves 2',q:['4 thick slices','3 tbsp (45 g), softened','2 cloves, minced'],t:['Heat the oven to 200C (400F).','Mix the butter and garlic with a pinch of salt.','Spread generously on one side of each slice and place on a tray, butter-side up.','Bake 6 to 8 minutes until golden and crisp at the edges.']},
+'Oatmeal cookies':{s:'Makes about 14',q:['1 1/2 cups (135 g) rolled','1 cup (125 g)','1/2 cup (115 g), softened','3/4 cup (150 g)','1 large'],t:['Heat the oven to 175C (350F) and line a tray with baking paper.','Beat the butter and sugar together until pale and fluffy, about 2 minutes. Beat in the egg.','Stir in the flour, oats and a pinch of salt until just combined. Add 1/2 tsp cinnamon if you have it.','Scoop tablespoon-sized balls onto the tray, 5 cm (2 inches) apart, and press them slightly flat.','Bake 10 to 12 minutes until golden at the edges. Cool 5 minutes on the tray before moving.']},
+'Banana bread':{s:'Makes 1 loaf',q:['3 very ripe, mashed','1 1/2 cups (190 g)','1 large','3/4 cup (150 g)','1/3 cup (75 g), melted'],t:['Heat the oven to 175C (350F) and grease a loaf tin (about 22 x 12 cm / 9 x 5 inch).','Mash the bananas in a large bowl, then stir in the melted butter, sugar and egg.','Fold in the flour and a pinch of salt just until no dry streaks remain. If you have baking soda, mix 1 tsp into the flour first so it rises.','Pour into the tin and bake 50 to 60 minutes until a knife in the center comes out clean.','Cool 10 minutes in the tin, then lift out and cool before slicing.']},
+'Brownies':{s:'Makes 12',q:['1/2 cup (115 g), melted','1 cup (200 g)','2 large','1/2 cup (65 g)','1/3 cup (35 g)'],t:['Heat the oven to 175C (350F) and line a 20 cm (8 inch) square tin with baking paper.','Whisk the melted butter and sugar together. Add the eggs one at a time and whisk until smooth and glossy.','Sift in the cocoa, flour and a pinch of salt. Fold gently until just combined.','Spread in the tin and bake 22 to 25 minutes. A knife in the center should come out with a few moist crumbs, not wet batter.','Cool completely in the tin before cutting. They firm up as they cool.']},
+'Apple crumble':{s:'Serves 4',q:['4 medium, peeled and sliced','1 cup (90 g) rolled','1/3 cup (75 g), cold and cubed','1/3 cup (65 g)','1 tsp'],t:['Heat the oven to 190C (375F).','Toss the apples with half of the sugar and the cinnamon in a baking dish.','Rub the butter into the oats and the rest of the sugar with your fingertips until crumbly.','Scatter the topping over the apples.','Bake 30 to 35 minutes until the top is golden and the apples bubble at the edges. Cool 10 minutes before serving.']},
+'Banana ice cream':{s:'Serves 2',q:['3 ripe, peeled and sliced'],t:['Freeze the banana slices on a tray in a single layer for at least 3 hours, until solid.','Blend the frozen slices in a food processor or strong blender, scraping down the sides often.','At first it looks crumbly. After 2 to 3 minutes it turns smooth and creamy like soft-serve. Add a splash of milk if it will not blend.','Eat right away for soft-serve, or freeze 1 hour for a firmer scoop.']},
+'Chocolate pudding':{s:'Serves 3',q:['2 cups (475 ml)','1/3 cup (65 g)','3 tbsp','3 tbsp'],t:['In a pot, whisk the sugar, cocoa, cornstarch and a pinch of salt. Whisk in about 1/4 cup of the milk to make a smooth paste.','Whisk in the rest of the milk. Cook over medium heat, stirring constantly.','After 6 to 8 minutes it thickens and bubbles. Cook 1 more minute while stirring, then take it off the heat.','Pour into cups and cool 20 minutes. Eat warm, or chill 2 hours for a firmer set. Press plastic wrap onto the surface to stop a skin forming.']},
+'Sugar cookies':{s:'Makes about 16',q:['2 cups (250 g)','1/2 cup (115 g), softened','2/3 cup (130 g)','1 large'],t:['Heat the oven to 175C (350F) and line a tray with baking paper.','Beat the butter and sugar until fluffy, about 2 minutes. Beat in the egg.','Stir in the flour and a pinch of salt to form a soft dough. If it is crumbly, add 1 tbsp milk.','Roll into walnut-sized balls, place 5 cm (2 inches) apart and press flat with the bottom of a glass.','Bake 9 to 11 minutes until the edges are barely golden. Cool on the tray 5 minutes.']},
+'Minestrone':{s:'Serves 4',q:['1 can (400 g), drained and rinsed','1/2 cup (50 g) small pasta','1 can (400 g) chopped, or 3 medium tomatoes','2 medium, diced','1 medium, diced'],t:['Heat 2 tbsp oil in a large pot. Cook the onion and carrots 6 minutes until soft.','Add the tomatoes, beans, 4 cups (950 ml) water and 1 tsp salt. Bring to a boil.','Simmer 15 minutes.','Add the pasta and cook 8 to 10 minutes until tender.','Season with salt and pepper and serve.']},
+'Chicken and rice soup':{s:'Serves 3',q:['2 thighs or 1 breast (about 300 g)','1/3 cup (65 g) uncooked','2 medium, sliced','1 medium, diced'],t:['Heat 1 tbsp oil in a pot. Cook the onion and carrots 5 minutes.','Add the chicken, 5 cups (1.2 L) water and 1 tsp salt. Bring to a boil, then simmer 15 minutes.','Add the rice and simmer 15 minutes more, until the rice is tender and the chicken is cooked through.','Lift out the chicken, shred it with two forks and return it to the pot.','Season with salt and pepper and serve.']},
+'Sweet potato soup':{s:'Serves 3',q:['2 large (about 600 g), peeled and cubed','1 medium, diced','3 cloves, minced'],t:['Heat 2 tbsp oil in a pot. Cook the onion 5 minutes, then the garlic for 30 seconds.','Add the sweet potato, 3 cups (700 ml) water and 1 tsp salt. Bring to a boil.','Simmer 20 minutes until very soft.','Blend until smooth, adding more water if it is too thick.','Season with salt and pepper and serve.']},
+'Mushroom soup':{s:'Serves 3',q:['300 g (10 oz), sliced','1 medium, diced','2 tbsp (30 g)','1 1/2 cups (350 ml)','2 tbsp'],t:['Melt the butter in a pot over medium heat. Cook the onion 4 minutes, then add the mushrooms and cook 8 minutes until golden and their liquid has gone.','Sprinkle in the flour and stir for 1 minute.','Slowly pour in 2 cups (475 ml) water, stirring, then the milk. Add 1/2 tsp salt.','Simmer gently 10 minutes, stirring often, until thickened. Do not let it boil hard.','Blend part of it for a creamy texture, or leave it chunky. Season with pepper and serve.']},
+'Broccoli cheddar soup':{s:'Serves 3',q:['2 medium heads (about 400 g), chopped','1 1/2 cups (150 g) grated','1 medium, diced','1 cup (240 ml)','2 tbsp (30 g)'],t:['Melt the butter in a pot. Cook the onion 5 minutes until soft.','Add the broccoli, 2 cups (475 ml) water and 1/2 tsp salt. Simmer 10 to 12 minutes until very tender.','Blend until mostly smooth, leaving a few small pieces.','Return to low heat, stir in the milk, then add the cheese a handful at a time until melted. Do not boil.','Season with salt and pepper and serve.']},
+'Corn chowder':{s:'Serves 4',q:['2 cups (300 g), frozen or canned','2 medium (about 400 g), diced','1 medium, diced','1 cup (240 ml)','2 tbsp (30 g)'],t:['Melt the butter in a pot. Cook the onion 5 minutes until soft.','Add the potatoes, 2 cups (475 ml) water and 1 tsp salt. Simmer 12 to 15 minutes until tender.','Add the corn and cook 5 minutes.','Mash some of the potatoes in the pot to thicken it, then stir in the milk and warm 3 minutes. Do not boil.','Season with salt and pepper and serve.']},
+'Chickpea tomato soup':{s:'Serves 3',q:['1 can (400 g), drained and rinsed','1 can (400 g) chopped, or 4 medium tomatoes','1 medium, diced','3 cloves, minced'],t:['Heat 2 tbsp oil in a pot. Cook the onion 5 minutes, then the garlic for 30 seconds.','Add the tomatoes, chickpeas, 2 cups (475 ml) water and 1/2 tsp salt.','Simmer 15 minutes. Add a pinch of chili flakes if you like some heat.','Mash a few chickpeas to thicken it, season with salt and pepper and serve.']},
+'Breakfast burrito':{s:'Serves 2',q:['2 large','4 large','1/2 cup (50 g) grated','1/2 can (200 g), drained and rinsed'],t:['Warm the beans in a small pot with 2 tbsp water and a pinch of salt for 4 minutes, mashing a few.','Whisk the eggs with salt and pepper. Scramble in a buttered or oiled pan over low heat for 2 to 3 minutes until just set.','Warm the tortillas in a dry pan for 20 seconds per side.','Fill with the beans, eggs and cheese, fold in the sides and roll up. Toast seam-side down for 1 minute if you like.']},
+'Apple cinnamon oatmeal':{s:'Serves 1',q:['1/2 cup (45 g) rolled','1 small, diced','1/2 tsp','1 cup (240 ml)'],t:['Put the oats, apple, cinnamon, milk and a pinch of salt in a small pot.','Bring to a gentle simmer over medium heat, stirring often.','Cook 5 minutes until thick and the apple is just soft.','Spoon into a bowl. Add honey or sugar if you want it sweeter.']},
+'Egg in a hole':{s:'Serves 1',q:['1 thick slice','1 large','1 tbsp (15 g)'],t:['Cut a hole about 6 cm (2.5 inches) wide in the center of the bread with a glass.','Melt half of the butter in a pan over medium heat. Butter both sides of the bread and place it in the pan with the cut-out circle beside it.','Crack the egg into the hole and season. Cook 2 minutes until the white sets.','Flip carefully and cook 1 minute more for a runny yolk, or 2 for firm. Toast the circle alongside and serve with it.']},
+'Hash browns':{s:'Serves 2',q:['2 large (about 500 g), peeled and grated','1/2 small, grated'],t:['Squeeze the grated potato and onion in a clean towel until very dry. This is the key to crisp hash browns.','Toss with 1/2 tsp salt and pepper.','Heat 3 tbsp oil in a large pan over medium heat. Press the mixture into an even layer about 1.5 cm (1/2 inch) thick.','Cook 8 minutes without moving until deep golden underneath, flip in sections and cook 6 minutes more.','Drain on paper towel and serve hot.']},
+'Banana smoothie':{s:'Serves 1',q:['1 ripe, preferably frozen','1/2 cup (120 ml)','1/2 cup (120 g)'],t:['Break the banana into chunks.','Add the banana, milk and yogurt to a blender.','Blend 45 seconds until smooth, adding more milk if it is too thick.','Pour and drink right away. Add a spoon of honey if you want it sweeter.']},
+'Cinnamon toast':{s:'Serves 1',q:['2 slices','1 tbsp (15 g), softened','1 tbsp','1/2 tsp'],t:['Mix the sugar and cinnamon in a small bowl.','Toast the bread until golden.','Spread the butter on the hot toast right away so it melts in.','Sprinkle with the cinnamon sugar, cut into triangles and serve.']},
+'Tofu scramble':{s:'Serves 2',q:['1 block (350 g), drained and crumbled','1/2 medium, diced','1 big handful (about 40 g)'],t:['Press the tofu with a clean towel to remove extra water, then crumble it with your hands.','Heat 1 tbsp oil in a pan over medium heat. Cook the onion 3 minutes.','Add the tofu, 1/2 tsp salt and plenty of pepper. Cook 5 minutes, stirring, until it looks like scrambled eggs and the liquid has gone.','Stir in the spinach for 1 minute until wilted. Add a pinch of turmeric if you have it for color.']},
+'Cheesy tomato toast':{s:'Serves 1',q:['2 slices','1 medium, sliced','1/2 cup (50 g) grated'],t:['Heat the grill (broiler) to high, or the oven to 220C (425F).','Toast the bread lightly, then top with the tomato slices and a pinch of salt.','Cover with the cheese.','Grill 3 to 4 minutes until bubbling and golden. Finish with pepper.']},
+'Cinnamon baked bananas':{s:'Serves 2',q:['2 ripe, peeled and halved lengthwise','1/2 tsp','2 tbsp'],t:['Heat the oven to 200C (400F).','Place the banana halves cut-side up in a baking dish.','Sprinkle with the cinnamon and sugar.','Bake 10 minutes until soft and caramelized at the edges. Serve warm.']},
+'No-bake oat bites':{s:'Makes about 12',q:['1 cup (90 g) rolled','1/2 cup (125 g)','1/4 cup (85 g)','2 tbsp'],t:['Mix the oats, peanut butter, honey and cocoa in a bowl until a thick, sticky dough forms. Add 1 tbsp milk if it is too dry.','Chill the mixture 15 minutes so it is easier to roll.','Roll into walnut-sized balls.','Store in the fridge. They keep about 5 days.']},
+'Hot chocolate':{s:'Serves 1',q:['1 cup (240 ml)','1 tbsp','1 tbsp'],t:['Whisk the cocoa and sugar with 2 tbsp of the milk in a small pot to make a smooth paste.','Add the rest of the milk and warm over medium heat, stirring, for 3 to 4 minutes until steaming. Do not boil.','Taste and add more sugar if needed.','Pour into a mug and serve.']},
+'Berry crumble':{s:'Serves 4',q:['3 cups (400 g), fresh or frozen','1 cup (90 g) rolled','1/3 cup (75 g), cold and cubed','1/3 cup (65 g)'],t:['Heat the oven to 190C (375F).','Toss the berries with a third of the sugar in a baking dish.','Rub the butter into the oats and the rest of the sugar until crumbly, then scatter over the berries.','Bake 25 to 30 minutes until golden and bubbling.','Cool 10 minutes before serving.']},
+'Baked custard':{s:'Serves 4',q:['3 large','2 cups (475 ml)','1/3 cup (65 g)'],t:['Heat the oven to 160C (325F) and boil some water for a water bath.','Warm the milk in a pot until steaming, not boiling. Whisk the eggs and sugar in a bowl, then slowly whisk in the hot milk.','Strain into 4 oven-safe cups or one dish and place in a deep tray.','Pour hot water into the tray to come halfway up the cups. Bake 30 to 40 minutes until the edges are set and the center still jiggles.','Cool, then chill at least 1 hour. Add nutmeg or cinnamon on top if you have it.']},
+'Simple meringues':{s:'Makes about 12',q:['3 large whites (save the yolks for another recipe)','3/4 cup (150 g)'],t:['Heat the oven to 110C (225F) and line a tray with baking paper. Make sure the bowl and whisk are completely clean and dry.','Whisk the egg whites with a pinch of salt until foamy, then until soft peaks form.','Add the sugar one spoonful at a time, whisking well after each, until the mixture is stiff and glossy and the sugar has dissolved. Rub a little between your fingers to check it is not gritty.','Spoon 12 mounds onto the tray.','Bake 60 to 75 minutes until they lift off the paper easily. Turn off the oven and leave them inside for 1 hour to dry.']},
+'Shortbread':{s:'Makes about 16',q:['1 1/2 cups (190 g)','1/2 cup (115 g), softened','1/4 cup (50 g)'],t:['Heat the oven to 160C (325F).','Mix the butter and sugar until smooth. Stir in the flour and a pinch of salt until it forms a crumbly dough, then press together with your hands.','Press into a 20 cm (8 inch) tin, prick all over with a fork and score into 16 pieces.','Bake 25 to 30 minutes until pale golden. Re-cut the lines while warm and cool in the tin.']},
+'Honey baked pears':{s:'Serves 2',q:['2 ripe, halved and cored','2 tbsp','1/2 tsp'],t:['Heat the oven to 190C (375F).','Place the pears cut-side up in a baking dish.','Drizzle with the honey and sprinkle with cinnamon.','Bake 25 to 30 minutes until tender, spooning the juices over once halfway. Serve warm.']},
+'Cabbage soup':{s:'Serves 4',q:['1/2 small head (about 400 g), shredded','2 medium, sliced','1 medium, diced','1 can (400 g) chopped, or 3 medium tomatoes'],t:['Heat 2 tbsp oil in a large pot. Cook the onion and carrots 5 minutes.','Add the cabbage and stir 3 minutes until it starts to wilt.','Add the tomatoes, 4 cups (950 ml) water and 1 tsp salt. Bring to a boil.','Simmer 20 minutes until the cabbage is tender.','Season with salt and pepper and serve.']},
+'Split pea soup':{s:'Serves 4',q:['1 cup (200 g) dried, rinsed','2 medium, diced','1 medium, diced'],t:['Heat 2 tbsp oil in a pot. Cook the onion and carrots 5 minutes.','Add the split peas, 5 cups (1.2 L) water and 1 tsp salt. Bring to a boil.','Reduce the heat and simmer, partly covered, 45 to 55 minutes, stirring now and then, until the peas fall apart.','Mash or blend until as smooth as you like, adding water if too thick.','Season with salt and pepper and serve.']},
+'Zucchini soup':{s:'Serves 3',q:['3 medium (about 500 g), sliced','1 medium, diced','1 medium (about 200 g), diced'],t:['Heat 2 tbsp oil in a pot. Cook the onion 5 minutes.','Add the potato, zucchini, 3 cups (700 ml) water and 1 tsp salt. Bring to a boil.','Simmer 15 minutes until the potato is tender.','Blend until smooth, adding water if it is too thick.','Season with salt and pepper and serve.']},
+'Cauliflower soup':{s:'Serves 3',q:['1 medium head (about 600 g), cut into florets','1 medium, diced','3 cloves, minced'],t:['Heat 2 tbsp oil in a pot. Cook the onion 5 minutes, then the garlic for 30 seconds.','Add the cauliflower, 3 cups (700 ml) water and 1 tsp salt. Bring to a boil.','Simmer 15 to 20 minutes until very soft.','Blend until smooth and creamy, adding water if needed.','Season with salt and pepper and serve.']},
+'Tomato lentil soup':{s:'Serves 4',q:['1 cup (200 g) red or brown, rinsed','1 can (400 g) chopped, or 4 medium tomatoes','1 medium, diced','3 cloves, minced'],t:['Heat 2 tbsp oil in a pot. Cook the onion 5 minutes, then the garlic for 30 seconds.','Add the lentils, tomatoes, 4 cups (950 ml) water and 1 tsp salt. Bring to a boil.','Simmer 20 to 25 minutes until the lentils are soft.','Blend part of it for a thicker texture, or leave it chunky.','Season with salt and pepper and serve.']},
+'Vegetable soup':{s:'Serves 4',q:['2 medium, sliced','2 medium (about 300 g), diced','1 medium, diced','1 can (400 g) chopped, or 3 medium tomatoes'],t:['Heat 2 tbsp oil in a large pot. Cook the onion and carrots 5 minutes.','Add the potatoes, tomatoes, 4 cups (950 ml) water and 1 tsp salt. Bring to a boil.','Simmer 20 to 25 minutes until the vegetables are tender.','Season with salt and pepper and serve.']},
+'Sweet potato lentil soup':{s:'Serves 4',q:['1 large (about 400 g), peeled and cubed','1/2 cup (100 g) red lentils, rinsed','1 medium, diced'],t:['Heat 2 tbsp oil in a pot. Cook the onion 5 minutes.','Add the sweet potato, lentils, 4 cups (950 ml) water and 1 tsp salt. Bring to a boil.','Simmer 20 minutes until both are very soft.','Mash or blend until as smooth as you like, adding water if it is thick.','Season with salt and pepper and serve.']},
+'White bean soup':{s:'Serves 3',q:['2 cans (400 g each), drained and rinsed','1 medium, diced','1 medium, diced','3 cloves, minced'],t:['Heat 2 tbsp oil in a pot. Cook the onion and carrot 5 minutes, then add the garlic for 30 seconds.','Add the beans, 3 cups (700 ml) water and 1 tsp salt. Bring to a boil.','Simmer 15 minutes.','Mash about a third of the beans against the side of the pot to thicken it.','Season with salt and pepper and serve.']},
+'Chicken vegetable soup':{s:'Serves 4',q:['2 thighs or 1 breast (about 300 g)','2 medium, sliced','2 medium (about 300 g), diced','1 medium, diced'],t:['Heat 1 tbsp oil in a pot. Cook the onion and carrots 5 minutes.','Add the chicken, potatoes, 5 cups (1.2 L) water and 1 tsp salt. Bring to a boil.','Simmer 25 minutes until the chicken is cooked through and the potatoes are tender.','Lift out the chicken, shred it with two forks and return it to the pot.','Season with salt and pepper and serve.']},
+'Tortilla soup':{s:'Serves 3',q:['3 small, cut into strips','1 can (400 g) chopped, or 3 medium tomatoes','1 can (400 g), drained and rinsed','1 medium, diced','3 cloves, minced'],t:['Heat the oven to 200C (400F). Toss the tortilla strips with 1 tbsp oil and a pinch of salt and bake 8 to 10 minutes until crisp.','Heat 1 tbsp oil in a pot. Cook the onion 5 minutes, then the garlic for 30 seconds.','Add the tomatoes, beans, 3 cups (700 ml) water and 1/2 tsp salt. Simmer 15 minutes.','Blend half of the soup for body, or leave it chunky. Season with salt and pepper.','Ladle into bowls and top with the crisp tortilla strips.']},
+'Peanut butter banana oatmeal':{s:'Serves 1',q:['1/2 cup (45 g) rolled','1 tbsp','1 ripe, sliced'],t:['Put the oats, 1 cup (240 ml) water and a pinch of salt in a small pot.','Bring to a simmer over medium heat and cook 5 minutes, stirring, until thick.','Stir in the peanut butter and half of the banana.','Pour into a bowl and top with the rest of the banana.']},
+'Chickpea scramble':{s:'Serves 2',q:['1 can (400 g), drained and rinsed','1/2 medium, diced','2 cloves, minced'],t:['Heat 1 tbsp oil in a pan over medium heat. Cook the onion 3 minutes, then add the garlic for 30 seconds.','Add the chickpeas and roughly mash them with a fork, leaving some whole.','Season with 1/2 tsp salt and plenty of pepper. Cook 5 minutes, stirring, until golden and hot.','Add a pinch of turmeric or chili flakes if you have them. Serve on toast or on its own.']},
+'Breakfast potatoes':{s:'Serves 2',q:['500 g (1 lb), cut into 2 cm (3/4 inch) cubes','1/2 medium, diced','2 cloves, minced'],t:['Boil the potato cubes in salted water for 5 minutes, then drain and let them steam dry.','Heat 2 tbsp oil in a large pan over medium-high heat. Add the potatoes in a single layer.','Cook 10 minutes, turning only every 2 to 3 minutes, until golden and crisp.','Add the onion and cook 4 minutes, then the garlic for 30 seconds.','Season with salt and pepper and serve.']},
+'Banana cinnamon toast':{s:'Serves 1',q:['2 slices','1 ripe','1/2 tsp'],t:['Toast the bread until golden.','Mash the banana with the cinnamon in a bowl until spreadable.','Spread it over the toast.','Sprinkle with a little more cinnamon and eat right away.']},
+'Avocado egg toast':{s:'Serves 1',q:['2 slices','1/2 ripe','2 large'],t:['Toast the bread. Mash the avocado with a pinch of salt in a bowl.','Heat 1 tsp oil in a pan over medium heat. Crack in the eggs and cook 3 minutes for a runny yolk, or 4 for firm.','Spread the avocado on the toast.','Top each slice with an egg and finish with pepper.']},
+'Tomato and eggs':{s:'Serves 2',q:['4 large','2 medium, cut into wedges','1 tsp'],t:['Beat the eggs with a pinch of salt.','Heat 1 tbsp oil in a pan over medium-high heat. Cook the eggs 30 seconds until just set in large curds, then move them to a plate.','Add 1 tsp oil and the tomatoes. Cook 3 to 4 minutes until they soften and release juice. Stir in the sugar and 1/4 tsp salt.','Return the eggs to the pan and fold gently for 30 seconds. Serve with rice or toast.']},
+'Chickpea curry':{s:'Serves 3',q:['2 cans (400 g each), drained and rinsed','1 can (400 g) chopped, or 4 medium tomatoes','1 large, diced','4 cloves, minced','1 1/2 tbsp'],t:['Heat 2 tbsp oil in a pot over medium heat. Cook the onion 6 minutes until soft and golden.','Add the garlic and curry powder and stir for 1 minute until fragrant.','Add the tomatoes, chickpeas, 1/2 cup (120 ml) water and 1 tsp salt. Bring to a boil.','Simmer 15 minutes, stirring now and then, until thick. Mash a few chickpeas to thicken it.','Taste and adjust the salt. Serve over rice if you have it.']},
+'Black bean tacos':{s:'Serves 2',q:['4 small','1 can (400 g), drained and rinsed','1 medium, diced','1 ripe, sliced'],t:['Warm the beans in a small pot with 2 tbsp water, 1/2 tsp salt and pepper for 4 minutes, mashing about half.','Warm the tortillas in a dry pan for 20 seconds per side.','Spoon the beans onto the tortillas.','Top with the tomato and avocado. Add chili flakes or a squeeze of lime if you have them.']},
+'Vegetable fried rice':{s:'Serves 2',q:['3 cups (500 g) cooked rice, cold','1 medium, finely diced','1/2 cup (75 g) frozen','2 tbsp','2 cloves, minced'],t:['Break up any clumps in the cold rice.','Heat 1 tbsp oil in a large pan or wok over high heat. Cook the carrot 3 minutes, then add the peas and garlic for 1 minute.','Add the rice and stir-fry 4 minutes, pressing it into the pan to get crispy bits.','Pour in the soy sauce, toss for 30 seconds and taste. Add more soy sauce if needed.']},
+'Lentil bolognese':{s:'Serves 3',q:['250 g (9 oz) spaghetti','1/2 cup (100 g) brown or green, rinsed','1 can (400 g) chopped, or 4 medium tomatoes','1 medium, finely diced','3 cloves, minced'],t:['Simmer the lentils in 2 cups (475 ml) water for 20 minutes until tender, then drain.','Heat 2 tbsp oil in a pan. Cook the onion 6 minutes, then add the garlic for 30 seconds.','Add the tomatoes, lentils and 1/2 tsp salt. Simmer 10 minutes until thick and saucy.','Meanwhile boil the pasta in salted water per the packet, saving 1/2 cup of pasta water before draining.','Toss the pasta with the sauce, adding pasta water if needed. Season with salt and pepper.']},
+'Stuffed sweet potatoes':{s:'Serves 2',q:['2 medium','1 can (400 g), drained and rinsed','1/2 medium, diced'],t:['Heat the oven to 200C (400F). Prick the sweet potatoes with a fork and bake directly on the rack 45 minutes until soft.','Heat 1 tbsp oil in a pan and cook the onion 4 minutes.','Add the beans, 2 tbsp water, 1/2 tsp salt and pepper. Cook 4 minutes, mashing a few.','Split the potatoes open and fluff the insides with a fork.','Spoon the beans over the top and serve.']},
+'Tofu stir-fry':{s:'Serves 2',q:['1 block (350 g), pressed and cubed','1 large head (about 300 g), cut into small florets','3 tbsp','3 cloves, minced','1 cup (200 g) uncooked'],t:['Start the rice: simmer it in 2 cups (475 ml) water, covered, for 15 minutes.','Press the tofu in a towel for 10 minutes, then cut into 2 cm (3/4 inch) cubes.','Heat 2 tbsp oil in a large pan over medium-high heat. Fry the tofu 8 minutes, turning, until golden on most sides. Set aside.','Stir-fry the broccoli with 3 tbsp water for 3 minutes. Add the garlic for 30 seconds.','Return the tofu, add the soy sauce and toss 1 minute. Serve over the rice.']}
+};
+const ALL=[...new Set(R.flatMap(r=>r[2]).filter(x=>!SS.has(N(x))))].sort();
+const CAT={'Scrambled eggs on toast':'b','Cheese omelette':'bl','Fried rice':'ld','Tomato pasta':'ld','Garlic butter pasta':'ld','Grilled cheese sandwich':'l','Mashed potatoes':'d','Loaded baked potato':'ld','Pancakes':'bw','French toast':'bw','Chicken and rice':'d','Tuna sandwich':'l','Quesadilla':'l','Bean burrito':'ld','Veggie stir-fry':'d','Tomato soup':'ls','Chicken wrap':'l','Egg salad sandwich':'l','Banana oatmeal':'bw','Peanut butter banana toast':'bw','Spaghetti aglio e olio':'d','Mac and cheese':'d','Potato and egg hash':'bd','Simple Greek salad':'l','Yogurt parfait':'bw','Lentil soup':'lds','Beef chili':'d','Cheeseburger':'d','Eggs in tomato sauce':'bd','Avocado toast':'bl','Bean and rice bowl':'ld','Banana oat pancakes':'bw','Baked chicken and potatoes':'d','Tuna pasta':'ld'};
+const NV=['chicken','tuna','ground beef'];
+Object.assign(CAT,{'Potato soup':'lds','Chicken noodle soup':'lds','Carrot soup':'lds','Black bean soup':'lds','Peanut butter cookies':'w','Rice pudding':'w','Baked cinnamon apples':'w','Mug cake':'w','Chickpea salad':'l','Roasted vegetables':'d','Honey garlic chicken':'d','Peanut pasta':'d','Spinach omelette':'b','Garlic bread':'l'});
+Object.assign(CAT,{'Pancakes':'b','French toast':'b','Banana oatmeal':'b','Peanut butter banana toast':'b','Banana oat pancakes':'b','Oatmeal cookies':'w','Banana bread':'w','Brownies':'w','Apple crumble':'w','Banana ice cream':'w','Chocolate pudding':'w','Sugar cookies':'w','Minestrone':'lds','Chicken and rice soup':'lds','Sweet potato soup':'lds','Mushroom soup':'lds','Broccoli cheddar soup':'lds','Corn chowder':'lds','Chickpea tomato soup':'lds'});
+Object.assign(CAT,{'Breakfast burrito':'b','Apple cinnamon oatmeal':'b','Egg in a hole':'b','Hash browns':'b','Banana smoothie':'b','Cinnamon toast':'b','Tofu scramble':'b','Cheesy tomato toast':'bl','Cinnamon baked bananas':'w','No-bake oat bites':'w','Hot chocolate':'w','Berry crumble':'w','Baked custard':'w','Simple meringues':'w','Shortbread':'w','Honey baked pears':'w','Cabbage soup':'lds','Split pea soup':'lds','Zucchini soup':'lds','Cauliflower soup':'lds'});
+Object.assign(CAT,{'Tomato lentil soup':'lds','Vegetable soup':'lds','Sweet potato lentil soup':'lds','White bean soup':'lds','Chicken vegetable soup':'lds','Tortilla soup':'lds','Peanut butter banana oatmeal':'b','Chickpea scramble':'b','Breakfast potatoes':'b','Banana cinnamon toast':'b','Avocado egg toast':'bl','Tomato and eggs':'bd','Chickpea curry':'d','Black bean tacos':'ld','Vegetable fried rice':'ld','Lentil bolognese':'d','Stuffed sweet potatoes':'d','Tofu stir-fry':'d'});
+const has=(r,T)=>r[2].some(x=>{const n=N(x);return n!=='peanut butter'&&T.some(t=>n.includes(t))});
+const FL=['chicken','tuna','beef','bacon','sausage','shrimp','fish','pork'];
+const AN=[...FL,'egg','cheese','butter','milk','mayo','yogurt','honey','feta','mozzarella','parmesan'];
+const DA=['cheese','butter','milk','yogurt','feta','cream','mozzarella','parmesan'];
+const GL=['bread','pasta','flour','tortilla','bun','oat','soy sauce','noodle','couscous'];
+const tg=r=>[!has(r,FL)&&(has(r,AN)?'Vegetarian':'Vegan'),!has(r,GL)&&'Gluten-free',!has(r,DA)&&'Dairy-free'].filter(Boolean).join(', ');
+const inCat=r=>!r[2].some(x=>ex.some(e=>N(x).includes(N(e))))&&(cat==='all'||(cat==='quick'?r[1]<=15:cat==='veg'?!has(r,FL):cat==='vegan'?!has(r,AN):cat==='gf'?!has(r,GL):cat==='df'?!has(r,DA):(CAT[r[0]]||'').includes(cat)));
+const $=id=>document.getElementById(id);
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let have=[],saved=[],shop=[],ex=[],stap=true,tab='ready',cat='all',rq='';
+try{have=JSON.parse(localStorage.getItem('of_have')||'[]');saved=JSON.parse(localStorage.getItem('of_saved')||'[]');shop=JSON.parse(localStorage.getItem('of_shop')||'[]');ex=JSON.parse(localStorage.getItem('of_ex')||'[]');stap=localStorage.getItem('of_stap')!=='0'}catch(e){}
+const save=()=>{try{localStorage.setItem('of_have',JSON.stringify(have));localStorage.setItem('of_saved',JSON.stringify(saved));localStorage.setItem('of_shop',JSON.stringify(shop));localStorage.setItem('of_ex',JSON.stringify(ex));localStorage.setItem('of_stap',stap?'1':'0')}catch(e){}};
+
+function add(name){
+  let n=name.toLowerCase().trim().replace(/\s+/g,' ');
+  if(!n)return;
+  const m=ALL.find(x=>N(x)===N(n));if(m)n=m;
+  if(!have.some(h=>N(h)===N(n)))have.push(n);
+  save();$('q').value='';renderAll();$('q').focus();
+}
+function analyze(r){
+  const hs=new Set(have.map(N));
+  const req=r[2].filter(x=>!(stap&&SS.has(N(x))));
+  const miss=req.filter(x=>!hs.has(N(x)));
+  return{r,miss,hit:req.length-miss.length,hs};
+}
+function renderHave(){
+  $('have').innerHTML=have.length?have.map((h,i)=>`<button class="chip" data-i="${i}" aria-label="Remove ${esc(h)}">${esc(h)} ×</button>`).join(''):'<span class="empty" style="padding:0">Nothing added yet.</span>';
+}
+function renderPick(){
+  const q=$('q').value.toLowerCase().trim(),hs=new Set(have.map(N));
+  let o=ALL.filter(x=>!hs.has(N(x))&&x.includes(q));
+  let h=(q&&!ALL.some(x=>N(x)===N(q)))?`<button class="sug" data-add="${esc(q)}">+ Add "${esc(q)}"</button>`:'';
+  $('pick').innerHTML=h+o.map(x=>`<button class="sug" data-add="${esc(x)}">${esc(x)}</button>`).join('');
+}
+function renderRecipes(){
+  const a=R.filter(inCat).filter(r=>!rq||r[0].toLowerCase().includes(rq)||r[2].some(x=>x.includes(rq))).map(analyze);
+  const ready=a.filter(x=>x.hit>0&&!x.miss.length);
+  const almost=a.filter(x=>x.hit>0&&x.miss.length>0&&x.miss.length<=2).sort((p,q)=>p.miss.length-q.miss.length);
+  const all=[...a].sort((p,q)=>p.miss.length-q.miss.length||p.r[0].localeCompare(q.r[0]));
+  const sets={ready,almost,all,saved:all.filter(x=>saved.includes(x.r[0]))};
+  const lab={ready:'Can make',almost:'Almost',all:'All',saved:'Saved'};
+  document.querySelectorAll('#tabs button').forEach(b=>{const t=b.dataset.t;b.textContent=`${lab[t]} (${sets[t].length})`;b.setAttribute('aria-pressed',t===tab)});
+  document.querySelectorAll('#cats button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===cat));
+  const list=sets[tab];
+  if(!list.length){
+    $('list').innerHTML='<p class="empty">'+(tab==='saved'?'Tap Save on a recipe to keep it here.':tab==='all'?'No recipes.':!have.length?'Add what is in your fridge to see recipes you can make.':tab==='ready'?'Nothing matches yet. Check Almost for recipes that need one or two more things.':'No recipes are within two ingredients. Add more items to your fridge.')+'</p>';return;
+  }
+  $('list').innerHTML=list.map(({r,miss,hs})=>{
+    const ok=!miss.length&&have.length;
+    const badge=ok?'<span class="st ok">Ready</span>':`<span class="st no">Need: ${esc(miss.join(', '))}</span>`;
+    const li=r[2].map(x=>{const h=hs.has(N(x))||(stap&&SS.has(N(x)));return`<li class="${h?'have':'need'}">${esc(x)}</li>`}).join('');
+    const sv=saved.includes(r[0]),op=openSet.has(r[0]);
+    return`<div class="card${op?' open':''}" data-n="${esc(r[0])}"><button class="hd" aria-expanded="${op}"><span class="nm">${esc(r[0])}<small>${r[1]} min</small></span>${badge}</button><div class="wrap"><div class="in"><div class="bd"><ul>${li}</ul><div class="acts"><button class="btn" data-save aria-pressed="${sv}">${sv?'Saved ✓':'Save'}</button>${miss.length?'<button class="btn" data-shop>+ List</button>':''}<button class="btn pri" data-view>Full recipe</button></div></div></div></div></div>`;
+  }).join('');
+}
+function renderAll(){renderHave();renderPick();renderEx();renderShopBtn();renderRecipes()}
+
+$('have').onclick=e=>{const b=e.target.closest('[data-i]');if(b){have.splice(+b.dataset.i,1);save();renderAll()}};
+$('pick').onclick=e=>{const b=e.target.closest('[data-add]');if(b)add(b.dataset.add)};
+$('q').oninput=renderPick;
+$('q').onkeydown=e=>{if(e.key==='Enter')add($('q').value)};
+$('addBtn').onclick=()=>add($('q').value);
+$('stap').checked=stap;
+$('stap').onchange=e=>{stap=e.target.checked;save();renderRecipes()};
+$('tabs').onclick=e=>{const b=e.target.closest('[data-t]');if(b){tab=b.dataset.t;renderRecipes()}};
+$('cats').onclick=e=>{const b=e.target.closest('[data-c]');if(b){cat=b.dataset.c;renderRecipes()}};
+const th=document.documentElement;
+const curTheme=()=>th.dataset.theme||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
+const lbl=()=>{$('theme').textContent=curTheme()==='dark'?'Light mode':'Dark mode'};
+try{const t=localStorage.getItem('of_theme');if(t)th.dataset.theme=t}catch(e){}
+$('theme').onclick=()=>{const t=curTheme()==='dark'?'light':'dark';th.dataset.theme=t;try{localStorage.setItem('of_theme',t)}catch(e){}lbl()};
+lbl();
+function renderShopBtn(){$('shopBtn').textContent='List ('+shop.length+')'}
+function renderEx(){$('exc').innerHTML=ex.length?ex.map((x,i)=>`<button class="sug" data-i="${i}" aria-label="Allow ${esc(x)} again">${esc(x)} ×</button>`).join(''):'<span class="empty" style="padding:0">Nothing left out.</span>'}
+function addEx(name){const n=name.toLowerCase().trim().replace(/\s+/g,' ');if(!n)return;if(!ex.some(e=>N(e)===N(n)))ex.push(n);save();$('exq').value='';renderEx();renderRecipes()}
+function addMissing(r){analyze(r).miss.forEach(x=>{if(!shop.some(s=>N(s)===N(x)))shop.push(x)});save();renderShopBtn()}
+function showShop(){
+  document.querySelectorAll('.mod').forEach(x=>x.remove());
+  const m=document.createElement('div');m.className='mod';m.setAttribute('role','dialog');m.setAttribute('aria-label','Shopping list');
+  m.innerHTML='<div class="in2"><button class="btn" data-x>← Back</button><h1>Shopping list</h1>'+(shop.length?`<ul>${shop.map((x,i)=>`<li><label class="si"><input type="checkbox" data-k="${i}"> ${esc(x)}</label></li>`).join('')}</ul><div class="acts"><button class="btn pri" data-bought>Bought: add to fridge</button><button class="btn" data-rm>Remove checked</button></div>`:'<p class="empty">Nothing here yet. Open a recipe and tap Add missing to shopping list.</p>')+'</div>';
+  m.onclick=e=>{
+    if(e.target.closest('[data-x]')){m.remove();return}
+    const ks=[...m.querySelectorAll('[data-k]:checked')].map(c=>+c.dataset.k);
+    if(!ks.length)return;
+    if(e.target.closest('[data-bought]')){ks.forEach(k=>{const x=shop[k];if(!have.some(h=>N(h)===N(x)))have.push(x)});shop=shop.filter((_,i)=>!ks.includes(i));save();renderAll();showShop()}
+    else if(e.target.closest('[data-rm]')){shop=shop.filter((_,i)=>!ks.includes(i));save();renderShopBtn();showShop()}
+  };
+  m.onkeydown=e=>{if(e.key==='Escape')m.remove()};
+  document.body.appendChild(m);m.querySelector('[data-x]').focus();
+}
+$('shopBtn').onclick=showShop;
+$('exd').innerHTML=ALL.map(x=>`<option value="${esc(x)}">`).join('');
+$('exc').onclick=e=>{const b=e.target.closest('[data-i]');if(b){ex.splice(+b.dataset.i,1);save();renderEx();renderRecipes()}};
+$('exBtn').onclick=()=>addEx($('exq').value);
+$('exq').onkeydown=e=>{if(e.key==='Enter')addEx($('exq').value)};
+$('rs').oninput=e=>{rq=e.target.value.toLowerCase().trim();renderRecipes()};
+$('surp').onclick=()=>{const a=R.filter(inCat).map(analyze);let p=a.filter(x=>x.hit>0&&!x.miss.length);if(!p.length)p=a.filter(x=>x.hit>0&&x.miss.length<=2);if(!p.length)p=a;if(!p.length)return;showFull(p[Math.floor(Math.random()*p.length)].r[0])};
+function dur(s){const m=s.match(/(\d+)(?:\s*(?:to|-)\s*(\d+))?\s*(minutes?|mins?|seconds?|secs?|hours?)\b/i);if(!m)return 0;const n=+(m[2]||m[1]),u=m[3].toLowerCase();return n*(u[0]==='h'?3600:u[0]==='m'?60:1)}
+const fmt=s=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+function cook(n){
+  const r=R.find(x=>x[0]===n),steps=D[n]?D[n].t:r[3].split('. ').map(s=>s.endsWith('.')?s:s+'.');
+  const base=steps.map(dur),left=base.slice(),run=steps.map(()=>false),ends=steps.map(()=>0);
+  let i=0,wl=null,ctx=null;
+  const m=document.createElement('div');m.className='mod ck';m.setAttribute('role','dialog');m.setAttribute('aria-label','Cooking '+n);
+  m.innerHTML='<div class="in2"><div class="ckh"><button class="btn" data-x>Exit</button><span class="cs"></span></div><div class="bar"><i></i></div><p class="ct"></p><div class="tw"><div class="td"></div><div class="acts"><button class="btn pri" data-tg></button><button class="btn" data-rs>Reset</button></div></div><p class="alert" role="status"></p><div class="acts nav"><button class="btn" data-pv>Back</button><button class="btn pri" data-nx>Next step</button></div><p class="sub keep"></p></div>';
+  const q=s=>m.querySelector(s);
+  const lock=async()=>{try{wl=await navigator.wakeLock.request('screen');q('.keep').textContent='Your screen will stay on while you cook.'}catch(e){q('.keep').textContent='This browser would not keep the screen on, so raise your screen timeout while cooking.'}};
+  const draw=()=>{
+    q('.cs').textContent='Step '+(i+1)+' of '+steps.length;
+    q('.bar i').style.width=((i+1)/steps.length*100)+'%';
+    q('.ct').textContent=steps[i];
+    q('.tw').hidden=!base[i];
+    q('.td').textContent=fmt(left[i]);
+    q('[data-tg]').textContent=run[i]?'Pause':left[i]?'Start timer':'Done';
+    q('[data-pv]').disabled=i===0;
+    q('[data-nx]').textContent=i===steps.length-1?'Finish':'Next step';
+  };
+  const ring=k=>{q('.alert').textContent='Timer for step '+(k+1)+' is done.';try{navigator.vibrate&&navigator.vibrate([300,150,300,150,300])}catch(e){}if(ctx){try{[0,.3,.6].forEach(d=>{const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=880;g.gain.value=.2;o.connect(g);g.connect(ctx.destination);o.start(ctx.currentTime+d);o.stop(ctx.currentTime+d+.2)})}catch(e){}}};
+  const iv=setInterval(()=>{const now=Date.now();let fin=-1;run.forEach((on,k)=>{if(on){left[k]=Math.max(0,Math.round((ends[k]-now)/1000));if(!left[k]){run[k]=false;fin=k}}});if(fin>=0)ring(fin);draw()},500);
+  const vis=()=>{if(document.visibilityState==='visible')lock()};
+  const close=()=>{clearInterval(iv);document.removeEventListener('visibilitychange',vis);try{wl&&wl.release()}catch(e){}m.remove()};
+  m.onclick=e=>{
+    if(e.target.closest('[data-x]')){close();return}
+    if(e.target.closest('[data-pv]')){if(i>0){i--;q('.alert').textContent=''}}
+    else if(e.target.closest('[data-nx]')){if(i<steps.length-1){i++;q('.alert').textContent=''}else{close();return}}
+    else if(e.target.closest('[data-tg]')){try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)()}catch(x){}if(run[i])run[i]=false;else if(left[i]){ends[i]=Date.now()+left[i]*1000;run[i]=true}}
+    else if(e.target.closest('[data-rs]')){run[i]=false;left[i]=base[i]}
+    draw();
+  };
+  document.addEventListener('visibilitychange',vis);
+  document.body.appendChild(m);lock();draw();
+}
+function showBackup(){
+  document.querySelectorAll('.mod').forEach(x=>x.remove());
+  const m=document.createElement('div');m.className='mod';m.setAttribute('role','dialog');m.setAttribute('aria-label','Backup and restore');
+  m.innerHTML='<div class="in2"><button class="btn" data-x>← Back</button><h1>Backup and restore</h1><p class="sub">Copy this code and keep it somewhere safe, like a note. To restore here or on another device, paste a saved code into the box and tap Restore.</p><textarea rows="8" aria-label="Backup code"></textarea><div class="acts"><button class="btn pri" data-cp>Copy</button><button class="btn" data-rt>Restore</button></div><p class="alert" role="status"></p></div>';
+  const ta=m.querySelector('textarea'),say=t=>{m.querySelector('.alert').textContent=t};
+  ta.value=JSON.stringify({v:1,have,saved,shop,ex,stap});
+  m.onclick=async e=>{
+    if(e.target.closest('[data-x]')){m.remove();return}
+    if(e.target.closest('[data-cp]')){try{await navigator.clipboard.writeText(ta.value);say('Copied.')}catch(x){ta.select();try{document.execCommand('copy');say('Copied.')}catch(y){say('Select the text and copy it manually.')}}}
+    if(e.target.closest('[data-rt]')){try{const o=JSON.parse(ta.value);if(!['have','saved','shop','ex'].every(k=>Array.isArray(o[k])&&o[k].every(x=>typeof x==='string')))throw 0;have=o.have;saved=o.saved;shop=o.shop;ex=o.ex;stap=o.stap!==false;$('stap').checked=stap;save();renderAll();say('Restored.')}catch(x){say('That is not a valid backup code.')}}
+  };
+  document.body.appendChild(m);m.querySelector('[data-x]').focus();
+}
+$('bk').onclick=showBackup;
+const openSet=new Set();
+$('list').onclick=e=>{
+  const c=e.target.closest('.card');if(!c)return;
+  const n=c.dataset.n;
+  if(e.target.closest('[data-save]')){saved=saved.includes(n)?saved.filter(x=>x!==n):[...saved,n];save();renderRecipes();return}
+  if(e.target.closest('[data-shop]')){const bt=e.target.closest('[data-shop]');addMissing(R.find(x=>x[0]===n));bt.textContent='Added ✓';return}
+  if(e.target.closest('[data-view]')){showFull(n);return}
+  if(e.target.closest('.hd')){const o=c.classList.toggle('open');o?openSet.add(n):openSet.delete(n);c.querySelector('.hd').setAttribute('aria-expanded',o)}
+};
+function showFull(n){
+  const r=R.find(x=>x[0]===n),a=analyze(r);
+  const steps=D[n]?D[n].t:r[3].split('. ').map(s=>s.endsWith('.')?s:s+'.');
+  const m=document.createElement('div');m.className='mod';m.setAttribute('role','dialog');m.setAttribute('aria-label',r[0]);
+  const li=r[2].map((x,i)=>`<li class="${a.hs.has(N(x))||(stap&&SS.has(N(x)))?'have':'need'}">${esc(D[n]?(D[n].q[i].toLowerCase().includes(N(x))?D[n].q[i]:x+': '+D[n].q[i]):x)}</li>`).join('');
+  m.innerHTML=`<div class="in2"><button class="btn" data-x>← Back</button><h1>${esc(r[0])}</h1><p class="sub">Takes ${r[1]} minutes. ${D[n]?D[n].s+'. ':''}${a.miss.length?'You still need: '+esc(a.miss.join(', ')):'You have everything.'}</p>${tg(r)?'<p class="sub">'+tg(r)+'</p>':''}<div class="acts" style="margin:0 0 14px"><button class="btn pri" data-cook>Start cooking</button></div><h2>Ingredients</h2><ul>${li}</ul>${a.miss.length?'<button class="btn" data-shop>Add missing to shopping list</button>':''}<h2>Steps</h2><ol>${steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol></div>`;
+  m.onclick=e=>{if(e.target.closest('[data-x]'))m.remove();const sb=e.target.closest('[data-shop]');if(sb){addMissing(r);sb.textContent='Added ✓'}if(e.target.closest('[data-cook]'))cook(n)};
+  m.onkeydown=e=>{if(e.key==='Escape')m.remove()};
+  document.body.appendChild(m);m.querySelector('[data-x]').focus();
+}
+renderAll();
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script>
+</body>
+</html>
